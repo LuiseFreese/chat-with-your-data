@@ -30,8 +30,8 @@ Push-Location $root
 try { $tracked = git ls-files 2>$null } finally { Pop-Location }
 
 $failures = @()
-$files = if ($tracked) { $tracked | ForEach-Object { Join-Path $root $_ } | Where-Object { Test-Path $_ } | Get-Item }
-         else { Get-ChildItem -Path $root -Recurse -File }
+$files = if ($tracked) { $tracked | ForEach-Object { Join-Path $root $_ } | Where-Object { Test-Path $_ } | Get-Item -Force }
+         else { Get-ChildItem -Path $root -Recurse -File -Force }
 
 # Presentations and office documents never belong in this repository (personal metadata, speaker notes).
 $files | Where-Object { $_.Name -match '\.(pptx?|pdf|docx?|key)$' } | ForEach-Object {
