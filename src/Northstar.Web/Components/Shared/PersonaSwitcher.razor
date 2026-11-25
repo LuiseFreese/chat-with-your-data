@@ -1,0 +1,25 @@
+@inject SimulatedUserContextAccessor Personas
+@inject ConversationState Conversation
+@inject PresentationState Presentation
+
+<label class="persona-switch">
+    <span>Persona</span>
+    <select class="select" value="@Personas.Current.UserPrincipalName" @onchange="OnChange">
+        @foreach (var p in DemoPersonas.All)
+        {
+            <option value="@p.UserPrincipalName">@p.DisplayName – @p.Role</option>
+        }
+    </select>
+</label>
+
+@code {
+    private void OnChange(ChangeEventArgs e)
+    {
+        var persona = DemoPersonas.Find(e.Value?.ToString() ?? "");
+        if (persona is null) return;
+        Personas.Switch(persona);
+        // A pending clarification belongs to the previous identity – drop it, keep the visible history.
+        Conversation.Context = ConversationContext.Empty;
+        Presentation.NotifyPersonaChanged();
+    }
+}

@@ -1,0 +1,7 @@
+expression DatabaseQuery =
+		let
+		    database = Sql.Database("YOUR-WAREHOUSE-SQL-ENDPOINT.datawarehouse.fabric.microsoft.com", "YOUR-WAREHOUSE-ID")
+		in
+		    database
+
+	annotation PBI_IncludeFutureArtifacts = False

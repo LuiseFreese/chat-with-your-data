@@ -1,0 +1,15 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+TestResults/
+*.log
+.env
+.env.local
+appsettings.*.local.json
+fabric/governed-model-id.txt
+*.pptx
+~$*
+.DS_Store
+*.pdf

@@ -1,0 +1,22 @@
+ProductKey,ProductName,Category,BusinessUnit,ListPrice
+1,"Northstar City 3",City,Northstar Bikes,899
+2,"Northstar City 7 Belt",City,Northstar Bikes,1299
+3,"Northstar Urban Flat",Urban,Northstar Bikes,1099
+4,"Northstar Urban Pro",Urban,Northstar Bikes,1599
+5,"Northstar Gravel AL",Gravel,Northstar Bikes,1899
+6,"Northstar Gravel Carbon",Gravel,Northstar Bikes,3499
+7,"Northstar Road Aero",Road,Northstar Bikes,4299
+8,"Northstar Road Endurance",Road,Northstar Bikes,2799
+9,"Northstar E-City 500",E-Bike,Northstar Bikes,2999
+10,"Northstar E-Trekking 625",E-Bike,Northstar Bikes,3799
+11,"Northstar E-Cargo Duo",E-Bike,Northstar Bikes,5499
+12,"Drivetrain Kit 12s",Components,Northstar Parts,649
+13,"Hydraulic Brake Set",Components,Northstar Parts,289
+14,"Carbon Wheelset 45",Components,Northstar Parts,1399
+15,"E-Bike Battery 625Wh",Components,Northstar Parts,799
+16,"Helmet Aero",Accessories,Northstar Parts,149
+17,"Pannier Set Waterproof",Accessories,Northstar Parts,119
+18,"Smart Lock",Accessories,Northstar Parts,179
+19,"Annual Service Plan",Service,Northstar Services,249
+20,"Fleet Maintenance Contract",Service,Northstar Services,1890
+21,"Extended Warranty 3y",Service,Northstar Services,199

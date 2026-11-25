@@ -1,0 +1,168 @@
+ReturnKey,OrderId,ReturnDate,Region,BusinessUnit,Amount,Reason
+1,500003,2025-01-13,West,Northstar Bikes,3854.95,Warranty replacement
+2,500004,2025-01-26,South,Northstar Bikes,2181.75,Wrong specification
+3,500008,2025-01-20,West,Northstar Bikes,1846.11,Warranty replacement
+4,500020,2025-01-30,North,Northstar Bikes,9589.49,Warranty replacement
+5,500037,2025-02-02,West,Northstar Bikes,2598.69,Wrong specification
+6,500072,2025-02-16,East,Northstar Parts,2394.07,Warranty replacement
+7,500094,2025-02-18,South,Northstar Bikes,3165.21,Customer withdrawal
+8,500097,2025-02-02,West,Northstar Bikes,9185.55,Damaged in transit
+9,500100,2025-02-06,East,Northstar Parts,8767.18,Customer withdrawal
+10,500101,2025-02-13,West,Northstar Parts,693.62,Warranty replacement
+11,500104,2025-02-19,North,Northstar Bikes,5016.88,Wrong specification
+12,500111,2025-02-27,East,Northstar Parts,87.16,Damaged in transit
+13,500115,2025-02-18,North,Northstar Bikes,1830.16,Wrong specification
+14,500143,2025-03-01,West,Northstar Parts,5258.13,Damaged in transit
+15,500163,2025-03-13,South,Northstar Parts,1874.61,Damaged in transit
+16,500194,2025-03-15,North,Northstar Bikes,2351.94,Damaged in transit
+17,500232,2025-04-08,North,Northstar Bikes,7014.30,Damaged in transit
+18,500271,2025-03-14,South,Northstar Parts,114.84,Damaged in transit
+19,500274,2025-04-09,West,Northstar Parts,1368.26,Damaged in transit
+20,500312,2025-04-02,West,Northstar Services,7761.39,Customer withdrawal
+21,500318,2025-04-13,East,Northstar Bikes,27029.66,Customer withdrawal
+22,500326,2025-04-05,North,Northstar Parts,1249.91,Customer withdrawal
+23,500381,2025-04-20,South,Northstar Parts,9878.20,Wrong specification
+24,500409,2025-05-11,South,Northstar Parts,1554.30,Damaged in transit
+25,500448,2025-05-13,North,Northstar Parts,519.98,Customer withdrawal
+26,500481,2025-05-04,South,Northstar Bikes,6809.14,Wrong specification
+27,500486,2025-05-17,North,Northstar Bikes,8482.98,Damaged in transit
+28,500535,2025-05-18,East,Northstar Parts,7090.79,Damaged in transit
+29,500536,2025-05-14,North,Northstar Parts,2690.47,Damaged in transit
+30,500543,2025-05-13,North,Northstar Parts,434.99,Warranty replacement
+31,500552,2025-05-30,North,Northstar Bikes,3251.86,Damaged in transit
+32,500588,2025-05-24,South,Northstar Parts,4132.33,Wrong specification
+33,500626,2025-05-27,North,Northstar Services,342.31,Customer withdrawal
+34,500631,2025-06-06,South,Northstar Parts,777.85,Wrong specification
+35,500634,2025-06-08,North,Northstar Bikes,1176.61,Customer withdrawal
+36,500682,2025-06-17,South,Northstar Bikes,2835.71,Warranty replacement
+37,500691,2025-06-21,North,Northstar Bikes,9899.30,Wrong specification
+38,500752,2025-06-09,West,Northstar Bikes,13968.67,Damaged in transit
+39,500776,2025-06-23,North,Northstar Bikes,1408.16,Customer withdrawal
+40,500791,2025-06-25,North,Northstar Bikes,5300.90,Damaged in transit
+41,500812,2025-07-04,East,Northstar Parts,2529.83,Damaged in transit
+42,500819,2025-07-07,North,Northstar Parts,11573.65,Damaged in transit
+43,500863,2025-06-30,East,Northstar Bikes,1085.47,Warranty replacement
+44,500872,2025-07-03,West,Northstar Parts,2718.64,Customer withdrawal
+45,500874,2025-06-29,West,Northstar Bikes,10891.76,Wrong specification
+46,500957,2025-07-09,West,Northstar Parts,410.38,Damaged in transit
+47,500969,2025-07-24,North,Northstar Services,4626.77,Customer withdrawal
+48,500997,2025-07-20,West,Northstar Parts,4635.64,Damaged in transit
+49,501003,2025-08-06,West,Northstar Parts,649.57,Damaged in transit
+50,501058,2025-07-15,North,Northstar Bikes,6192.21,Damaged in transit
+51,501085,2025-07-22,West,Northstar Parts,114.96,Wrong specification
+52,501145,2025-08-07,South,Northstar Parts,78.35,Damaged in transit
+53,501155,2025-08-21,East,Northstar Parts,22759.52,Wrong specification
+54,501164,2025-08-23,South,Northstar Parts,97.85,Warranty replacement
+55,501169,2025-08-20,North,Northstar Bikes,2354.52,Damaged in transit
+56,501188,2025-08-20,East,Northstar Bikes,13191.36,Customer withdrawal
+57,501220,2025-09-10,West,Northstar Bikes,1709.88,Warranty replacement
+58,501288,2025-08-21,South,Northstar Bikes,5533.72,Customer withdrawal
+59,501318,2025-09-17,East,Northstar Bikes,26610.33,Damaged in transit
+60,501336,2025-09-13,West,Northstar Bikes,1418.87,Wrong specification
+61,501350,2025-09-14,West,Northstar Parts,64.97,Warranty replacement
+62,501368,2025-09-24,South,Northstar Parts,2194.23,Customer withdrawal
+63,501371,2025-10-01,West,Northstar Bikes,1135.79,Wrong specification
+64,501374,2025-09-06,West,Northstar Bikes,11023.38,Wrong specification
+65,501393,2025-10-03,South,Northstar Parts,8026.19,Customer withdrawal
+66,501394,2025-10-09,East,Northstar Bikes,1075.35,Customer withdrawal
+67,501408,2025-09-26,South,Northstar Parts,4230.46,Damaged in transit
+68,501410,2025-09-17,East,Northstar Parts,1107.06,Warranty replacement
+69,501424,2025-10-01,West,Northstar Parts,348.65,Customer withdrawal
+70,501442,2025-09-14,West,Northstar Parts,391.01,Customer withdrawal
+71,501443,2025-10-02,North,Northstar Bikes,5484.19,Warranty replacement
+72,501467,2025-09-18,East,Northstar Bikes,22719.84,Damaged in transit
+73,501494,2025-10-01,West,Northstar Bikes,3977.28,Damaged in transit
+74,501495,2025-10-16,East,Northstar Bikes,1829.76,Warranty replacement
+75,501503,2025-09-30,North,Northstar Bikes,3622.44,Wrong specification
+76,501511,2025-10-14,North,Northstar Bikes,4598.06,Customer withdrawal
+77,501512,2025-10-10,South,Northstar Bikes,2591.40,Damaged in transit
+78,501586,2025-10-25,West,Northstar Bikes,17587.60,Customer withdrawal
+79,501590,2025-10-17,East,Northstar Parts,424.44,Warranty replacement
+80,501610,2025-11-13,West,Northstar Bikes,4128.39,Customer withdrawal
+81,501621,2025-11-03,East,Northstar Parts,1858.86,Warranty replacement
+82,501699,2025-12-03,East,Northstar Services,5845.59,Damaged in transit
+83,501708,2025-11-11,South,Northstar Parts,1045.50,Customer withdrawal
+84,501718,2025-11-12,South,Northstar Bikes,2902.56,Damaged in transit
+85,501724,2025-12-03,North,Northstar Parts,771.98,Warranty replacement
+86,501792,2025-11-30,West,Northstar Bikes,7062.16,Wrong specification
+87,501796,2025-12-09,West,Northstar Parts,6803.37,Damaged in transit
+88,501803,2025-12-29,North,Northstar Services,218.86,Damaged in transit
+89,501823,2025-12-23,North,Northstar Bikes,9412.85,Warranty replacement
+90,501873,2026-01-04,West,Northstar Bikes,1974.96,Warranty replacement
+91,501881,2026-01-15,West,Northstar Parts,83.52,Customer withdrawal
+92,501910,2026-01-03,West,Northstar Services,399.83,Wrong specification
+93,501937,2026-01-27,West,Northstar Bikes,5577.61,Customer withdrawal
+94,501956,2026-01-21,South,Northstar Parts,148.23,Warranty replacement
+95,501959,2026-02-05,South,Northstar Bikes,2969.44,Customer withdrawal
+96,501978,2026-02-17,North,Northstar Parts,4320.45,Damaged in transit
+97,501998,2026-03-03,East,Northstar Bikes,2873.61,Damaged in transit
+98,502005,2026-02-23,South,Northstar Bikes,8652.51,Wrong specification
+99,502050,2026-03-14,North,Northstar Parts,4140.26,Customer withdrawal
+100,502134,2026-03-21,West,Northstar Parts,435.89,Customer withdrawal
+101,502143,2026-03-12,East,Northstar Bikes,1649.91,Warranty replacement
+102,502158,2026-03-29,West,Northstar Parts,969.24,Customer withdrawal
+103,502189,2026-03-23,West,Northstar Bikes,3478.66,Customer withdrawal
+104,502295,2026-04-17,West,Northstar Bikes,8873.46,Damaged in transit
+105,502324,2026-05-06,North,Northstar Bikes,9054.97,Wrong specification
+106,502414,2026-05-13,North,Northstar Bikes,4039.46,Customer withdrawal
+107,502434,2026-05-24,West,Northstar Bikes,837.23,Customer withdrawal
+108,502443,2026-05-08,West,Northstar Bikes,949.52,Damaged in transit
+109,502447,2026-05-06,South,Northstar Bikes,817.45,Wrong specification
+110,502475,2026-05-27,West,Northstar Parts,199.17,Wrong specification
+111,502527,2026-05-07,West,Northstar Bikes,2467.04,Wrong specification
+112,502537,2026-05-14,West,Northstar Bikes,6797.03,Customer withdrawal
+113,502585,2026-06-18,West,Northstar Parts,86.30,Wrong specification
+114,502629,2026-06-19,East,Northstar Bikes,3105.91,Wrong specification
+115,502635,2026-06-24,East,Northstar Bikes,852.14,Customer withdrawal
+116,502674,2026-06-05,North,Northstar Bikes,5006.34,Customer withdrawal
+117,502690,2026-06-24,North,Northstar Parts,65.55,Wrong specification
+118,502703,2026-06-11,East,Northstar Bikes,3923.31,Customer withdrawal
+119,502749,2026-07-11,South,Northstar Bikes,10939.12,Wrong specification
+120,502765,2026-06-15,North,Northstar Bikes,989.70,Customer withdrawal
+121,502772,2026-06-29,North,Northstar Parts,451.40,Warranty replacement
+122,502784,2026-07-05,South,Northstar Bikes,7376.46,Wrong specification
+123,502789,2026-07-08,East,Northstar Parts,4273.09,Warranty replacement
+124,502798,2026-06-30,West,Northstar Parts,158.33,Warranty replacement
+125,502808,2026-07-14,West,Northstar Bikes,22381.66,Warranty replacement
+126,502823,2026-06-17,East,Northstar Bikes,3599.56,Damaged in transit
+127,502836,2026-06-25,West,Northstar Parts,319.53,Wrong specification
+128,502864,2026-06-29,North,Northstar Bikes,4711.79,Wrong specification
+129,502873,2026-07-13,East,Northstar Bikes,1285.72,Warranty replacement
+130,502895,2026-06-30,South,Northstar Bikes,1379.22,Wrong specification
+131,502901,2026-06-27,North,Northstar Parts,242.29,Damaged in transit
+132,502929,2026-07-30,East,Northstar Bikes,5120.48,Customer withdrawal
+133,502930,2026-07-03,South,Northstar Bikes,4408.72,Customer withdrawal
+134,502940,2026-07-05,East,Northstar Parts,418.07,Customer withdrawal
+135,502944,2026-07-20,West,Northstar Parts,4860.10,Wrong specification
+136,502950,2026-07-26,West,Northstar Bikes,1823.95,Warranty replacement
+137,503024,2026-07-29,East,Northstar Parts,221.17,Warranty replacement
+138,503031,2026-07-16,East,Northstar Services,129.69,Damaged in transit
+139,503034,2026-07-25,South,Northstar Parts,253.64,Warranty replacement
+140,503035,2026-08-15,North,Northstar Bikes,2556.61,Wrong specification
+141,503067,2026-07-19,West,Northstar Services,338.80,Damaged in transit
+142,503117,2026-08-03,East,Northstar Parts,652.46,Warranty replacement
+143,503130,2026-08-05,South,Northstar Bikes,1813.17,Warranty replacement
+144,503230,2026-08-30,East,Northstar Parts,2182.89,Warranty replacement
+145,503272,2026-09-14,North,Northstar Bikes,3188.33,Wrong specification
+146,503288,2026-09-02,South,Northstar Parts,4054.24,Damaged in transit
+147,503371,2026-09-22,East,Northstar Bikes,1004.76,Customer withdrawal
+148,503416,2026-10-06,West,Northstar Bikes,16546.55,Warranty replacement
+149,503433,2026-09-24,South,Northstar Bikes,8194.77,Warranty replacement
+150,503434,2026-10-14,West,Northstar Bikes,4501.05,Warranty replacement
+151,503487,2026-10-05,East,Northstar Bikes,2535.56,Customer withdrawal
+152,503515,2026-10-23,East,Northstar Parts,4192.95,Customer withdrawal
+153,503525,2026-10-07,East,Northstar Bikes,4016.62,Wrong specification
+154,503532,2026-10-29,North,Northstar Parts,2442.76,Wrong specification
+155,503545,2026-10-23,South,Northstar Bikes,4734.76,Customer withdrawal
+156,503547,2026-10-03,West,Northstar Parts,756.29,Customer withdrawal
+157,503551,2026-10-01,West,Northstar Bikes,1308.22,Wrong specification
+158,503552,2026-10-22,South,Northstar Parts,1184.04,Warranty replacement
+159,503564,2026-10-22,East,Northstar Bikes,498.05,Damaged in transit
+160,503568,2026-10-08,North,Northstar Parts,378.39,Customer withdrawal
+161,503666,2026-11-13,North,Northstar Parts,315.86,Wrong specification
+162,503708,2026-12-08,South,Northstar Bikes,1593.93,Warranty replacement
+163,503762,2026-12-01,East,Northstar Bikes,4185.93,Wrong specification
+164,503769,2026-11-29,East,Northstar Bikes,4568.00,Warranty replacement
+165,503804,2026-12-11,East,Northstar Parts,511.98,Wrong specification
+166,503834,2026-12-14,East,Northstar Bikes,11456.33,Customer withdrawal
+167,503843,2026-12-28,East,Northstar Parts,4041.46,Warranty replacement

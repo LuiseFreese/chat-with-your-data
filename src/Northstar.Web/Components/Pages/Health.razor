@@ -1,0 +1,168 @@
+@page "/health"
+@inject SystemHealthService HealthService
+@inject IUserContextAccessor Users
+@implements IDisposable
+
+<PageTitle>System Health · Northstar</PageTitle>
+
+<div class="page-head">
+    <div>
+        <h1 class="grad-text">System Health</h1>
+        <p class="lead">Live status of every component the pipeline depends on, plus the audit trail. Nothing on this page is hardcoded – auto-refreshes every 30 seconds.</p>
+    </div>
+    <div style="display:flex;gap:.6rem;align-items:center">
+        @if (lastRefresh is not null) { <span class="small dim">updated @Format.Time(lastRefresh.Value)</span> }
+        <button class="btn" type="button" @onclick="RefreshAsync" disabled="@loading">@(loading ? "Checking…" : "↻ Refresh")</button>
+    </div>
+</div>
+
+@if (error is not null)
+{
+    <div class="card accent-red"><h3>Health check failed</h3><p>@error</p></div>
+}
+else if (snapshot is null)
+{
+    <div class="thinking"><span class="spinner"></span> Running health checks…</div>
+}
+else
+{
+    var allOk = snapshot.Components.All(c => c.Healthy);
+    <div class="card @(allOk ? "accent-cyan" : "accent-pink")">
+        <div class="grid-3">
+            <div>
+                <div class="big-label">Execution mode</div>
+                <div style="margin-top:.3rem"><span class="badge @(snapshot.Mode == ExecutionMode.Connected ? "cyan" : "amber")" style="font-size:.95rem">@(snapshot.Mode == ExecutionMode.Connected ? "CONNECTED – Microsoft Fabric" : "LOCAL DEMO MODE – synthetic data")</span></div>
+            </div>
+            <div>
+                <div class="big-label">Authentication</div>
+                <div style="margin-top:.3rem">
+                    @if (user is null)
+                    {
+                        <span class="badge red">not resolved</span>
+                    }
+                    else
+                    {
+                        <strong>@user.DisplayName</strong> <span class="muted">(@user.Role)</span>
+                        <span class="badge @(user.IsSimulated ? "amber" : "cyan")">@(user.IsSimulated ? "simulated persona" : "signed in")</span>
+                    }
+                </div>
+            </div>
+            <div>
+                <div class="big-label">Overall</div>
+                <div class="health-card @(allOk ? "ok" : "bad")" style="margin-top:.3rem"><div class="status"><span class="light"></span>@(allOk ? "All components healthy" : $"{snapshot.Components.Count(c => !c.Healthy)} component(s) unhealthy")</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-auto" style="margin-top:1rem">
+        @foreach (var c in snapshot.Components)
+        {
+            <div class="card health-card @(c.Healthy ? "ok accent-cyan" : "bad accent-pink")">
+                <div class="small muted" style="text-transform:uppercase;letter-spacing:.07em">@c.Component</div>
+                <div class="status"><span class="light"></span>@c.Status</div>
+                <dl class="kv small">
+                    <dt>Latency</dt><dd>@(c.Latency is null ? "–" : Format.Ms(c.Latency.Value))</dd>
+                    <dt>Detail</dt><dd>@(c.Detail ?? "–")</dd>
+                    <dt>Checked</dt><dd>@Format.Time(c.CheckedAt)</dd>
+                </dl>
+            </div>
+        }
+    </div>
+
+    <div class="grid-3" style="margin-top:1rem">
+        <div class="card"><div class="stat"><b>@snapshot.QueriesTotal</b><span>Queries recorded</span></div></div>
+        <div class="card"><div class="stat"><b>@(snapshot.AverageDuration is null ? "–" : Format.Ms(snapshot.AverageDuration.Value))</b><span>Average duration</span></div></div>
+        <div class="card"><div class="stat"><b style="color:@(snapshot.RecentErrors.Count == 0 ? "var(--cyan)" : "var(--pink)")">@snapshot.RecentErrors.Count</b><span>Recent errors</span></div></div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1rem">
+        <div class="card">
+            <h3>Last successful query</h3>
+            @if (snapshot.LastSuccessfulQuery is { } q)
+            {
+                <p style="font-size:1.05rem;margin:.3rem 0">“@q.Question”</p>
+                <p class="small muted">@Format.DateTime(q.Timestamp) · @q.User · @q.Outcome · @Format.Ms(q.TotalDuration)</p>
+            }
+            else
+            {
+                <p class="muted">No successful query yet.</p>
+            }
+        </div>
+        <div class="card">
+            <h3>Recent errors</h3>
+            @if (snapshot.RecentErrors.Count == 0)
+            {
+                <p class="muted">None.</p>
+            }
+            else
+            {
+                <table class="table">
+                    <thead><tr><th>Time</th><th>Question</th><th>Error</th></tr></thead>
+                    <tbody>
+                        @foreach (var e in snapshot.RecentErrors)
+                        {
+                            <tr><td class="mono small nowrap">@Format.Time(e.Timestamp)</td><td>@e.Question</td><td><span class="badge red">@e.Error</span></td></tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private SystemHealthSnapshot? snapshot;
+    private UserContext? user;
+    private string? error;
+    private bool loading;
+    private DateTimeOffset? lastRefresh;
+    private readonly CancellationTokenSource cts = new();
+    private PeriodicTimer? timer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshAsync();
+        timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
+        _ = AutoRefreshAsync();
+    }
+
+    private async Task AutoRefreshAsync()
+    {
+        try
+        {
+            while (timer is not null && await timer.WaitForNextTickAsync(cts.Token))
+                await InvokeAsync(RefreshAsync);
+        }
+        catch (OperationCanceledException) { }
+    }
+
+    private async Task RefreshAsync()
+    {
+        if (loading) return;
+        loading = true; error = null;
+        StateHasChanged();
+        try
+        {
+            try { user = Users.Current; } catch { user = null; }
+            snapshot = await HealthService.GetAsync(cts.Token);
+            lastRefresh = DateTimeOffset.UtcNow;
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex)
+        {
+            error = $"Health checks could not be completed ({ex.GetType().Name}).";
+        }
+        finally
+        {
+            loading = false;
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        cts.Cancel();
+        timer?.Dispose();
+        cts.Dispose();
+    }
+}

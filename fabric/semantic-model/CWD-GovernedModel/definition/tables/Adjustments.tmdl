@@ -1,0 +1,89 @@
+/// Manual Finance corrections. Source = Pipeline (legacy feed) or Excel (reconciled workbook). Only Status = Approved counts.
+table Adjustments
+	sourceLineageTag: [cwd].[FactFinanceAdjustment]
+
+	column AdjustmentKey
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: AdjustmentKey
+		sourceLineageTag: AdjustmentKey
+		isHidden
+
+	column 'Adjustment Date'
+		dataType: dateTime
+		summarizeBy: none
+		sourceColumn: Adjustment Date
+		sourceLineageTag: Adjustment Date
+		sourceProviderType: date
+		formatString: yyyy-mm-dd
+		isHidden
+
+	column RegionKey
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: RegionKey
+		sourceLineageTag: RegionKey
+		isHidden
+
+	column BusinessUnitKey
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: BusinessUnitKey
+		sourceLineageTag: BusinessUnitKey
+		isHidden
+
+	column Amount
+		dataType: double
+		sourceColumn: Amount
+		sourceLineageTag: Amount
+		formatString: #,##0.00 €
+		summarizeBy: sum
+		isHidden
+
+	column Reason
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Reason
+		sourceLineageTag: Reason
+
+	/// Pipeline or Excel
+	column Source
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Source
+		sourceLineageTag: Source
+
+	column 'Approved By'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Approved By
+		sourceLineageTag: Approved By
+
+	/// Approved or Pending
+	column Status
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Status
+		sourceLineageTag: Status
+
+	column Comment
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Comment
+		sourceLineageTag: Comment
+
+	column 'Loaded At'
+		dataType: dateTime
+		summarizeBy: none
+		sourceColumn: Loaded At
+		sourceLineageTag: Loaded At
+		sourceProviderType: datetime2
+		isHidden
+
+	partition Adjustments = entity
+		mode: directLake
+		source
+			entityName: FactFinanceAdjustment
+			schemaName: cwd
+			expressionSource: DatabaseQuery
+

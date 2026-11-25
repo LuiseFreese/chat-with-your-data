@@ -1,0 +1,9 @@
+/// Restricts every measure to the regions mapped to the signed-in user in 'Region Access'. Workspace Admins/Members/Contributors are not subject to RLS.
+/// Role members are tenant-specific and are NOT part of this definition: assign them in the Fabric portal
+/// (model → Security) or with 'Northstar.Fabric.Tool rls-members' after configuring NORTHSTAR_RLS_USERS.
+role 'Regional Reader'
+	modelPermission: read
+
+	tablePermission Region = 'Region'[Region] IN SELECTCOLUMNS(FILTER(ALL('Region Access'), 'Region Access'[User Principal Name] = USERPRINCIPALNAME()), "Region", 'Region Access'[Region])
+
+	tablePermission 'Region Access' = 'Region Access'[User Principal Name] = USERPRINCIPALNAME()

@@ -1,0 +1,24 @@
+table 'Business Unit'
+	sourceLineageTag: [cwd].[DimBusinessUnit]
+
+	column BusinessUnitKey
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: BusinessUnitKey
+		sourceLineageTag: BusinessUnitKey
+		isHidden
+
+	/// Legal/operational unit that booked the order
+	column 'Business Unit'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Business Unit
+		sourceLineageTag: Business Unit
+
+	partition 'Business Unit' = entity
+		mode: directLake
+		source
+			entityName: DimBusinessUnit
+			schemaName: cwd
+			expressionSource: DatabaseQuery
+

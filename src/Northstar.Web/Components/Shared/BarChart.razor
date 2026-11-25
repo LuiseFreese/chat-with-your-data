@@ -1,0 +1,117 @@
+@using System.Globalization
+@using System.Net
+@using System.Text
+
+@if (Rows.Count > 0)
+{
+    var hasCompare = Rows.Any(r => r.CompareValue is not null);
+    <div class="chart">
+        @if (hasCompare && (ValueLabel is not null || CompareLabel is not null))
+        {
+            <div class="legend">
+                <span class="cmp">@(CompareLabel ?? "Compare")</span>
+                <span class="cur">@(ValueLabel ?? "Value")</span>
+            </div>
+        }
+        @((MarkupString)(Line && Rows.Count > 1 ? BuildLine(hasCompare) : BuildBars(hasCompare)))
+    </div>
+}
+
+@code {
+    /// <summary>Rows to draw. A row with CompareValue switches to grouped bars / two lines.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<ChartRow> Rows { get; set; } = [];
+    [Parameter] public bool Currency { get; set; } = true;
+    [Parameter] public string? ValueLabel { get; set; }
+    [Parameter] public string? CompareLabel { get; set; }
+    /// <summary>Render as a simple line instead of bars (used for month/quarter series).</summary>
+    [Parameter] public bool Line { get; set; }
+    /// <summary>When the compare period is chronologically later, show the delta of Compare vs Value instead of Value vs Compare.</summary>
+    [Parameter] public bool DeltaFromCompare { get; set; }
+
+    private const string Pink = "#FF69B4", Violet = "#A78BFA", Cyan = "#4FD1C5", Red = "#FF5C8A";
+
+    private decimal Max => Math.Max(1m, Rows.SelectMany(r => new[] { r.Value, r.CompareValue }).Where(v => v is not null).Select(v => Math.Abs(v!.Value)).DefaultIfEmpty(1m).Max());
+
+    private static string S(double v) => v.ToString("0.##", CultureInfo.InvariantCulture);
+    private static string E(string s) => WebUtility.HtmlEncode(s);
+    private static string Truncate(string s, int n) => s.Length <= n ? s : s[..(n - 1)] + "…";
+    private string V(decimal? v) => E(Format.Value(v, Currency));
+
+    // SVG <text> cannot be written in Razor markup (reserved tag), so the chart body is built as a string.
+    private string BuildBars(bool hasCompare)
+    {
+        var max = Max;
+        var rowH = hasCompare ? 62.0 : 44.0;
+        var barH = hasCompare ? 18.0 : 26.0;
+        var labelW = 250.0; var valueW = 200.0; var w = 1000.0;
+        var barX = labelW + 10; var barW = w - barX - valueW;
+        var h = Rows.Count * rowH + 10;
+
+        var sb = new StringBuilder();
+        sb.Append($"<svg viewBox=\"0 0 {S(w)} {S(h)}\" role=\"img\" aria-label=\"Bar chart\">");
+        sb.Append($"<defs><linearGradient id=\"nsgrad\" x1=\"0\" x2=\"1\" y1=\"0\" y2=\"0\"><stop offset=\"0\" stop-color=\"{Pink}\"/><stop offset=\"1\" stop-color=\"{Violet}\"/></linearGradient></defs>");
+
+        for (var i = 0; i < Rows.Count; i++)
+        {
+            var r = Rows[i];
+            var top = i * rowH + 5;
+            var curLen = Math.Max(2, barW * (double)(Math.Abs(r.Value ?? 0) / max));
+            var cmpLen = Math.Max(2, barW * (double)(Math.Abs(r.CompareValue ?? 0) / max));
+            var labelY = top + rowH / 2 + 6;
+            sb.Append($"<text class=\"lbl\" x=\"{S(labelW)}\" y=\"{S(labelY)}\" font-size=\"17\" text-anchor=\"end\">{E(Truncate(r.Label, 28))}</text>");
+
+            if (hasCompare)
+            {
+                var y1 = top + 6; var y2 = y1 + barH + 6;
+                var up = DeltaFromCompare ? (r.CompareValue ?? 0) >= (r.Value ?? 0) : (r.Value ?? 0) >= (r.CompareValue ?? 0);
+                var deltaColor = up ? Cyan : Red;
+                var delta = DeltaFromCompare ? Format.DeltaPercent(r.CompareValue, r.Value) : Format.DeltaPercent(r.Value, r.CompareValue);
+                sb.Append($"<rect x=\"{S(barX)}\" y=\"{S(y1)}\" width=\"{S(cmpLen)}\" height=\"{S(barH)}\" rx=\"4\" fill=\"{Violet}\" opacity=\"0.8\"/>");
+                sb.Append($"<text class=\"val\" x=\"{S(barX + barW + 10)}\" y=\"{S(y1 + barH - 4)}\" font-size=\"15\" fill=\"#DCD2FF\">{V(r.CompareValue)}</text>");
+                sb.Append($"<rect x=\"{S(barX)}\" y=\"{S(y2)}\" width=\"{S(curLen)}\" height=\"{S(barH)}\" rx=\"4\" fill=\"{((r.Value ?? 0) < 0 ? Red : Pink)}\"/>");
+                sb.Append($"<text class=\"val\" x=\"{S(barX + barW + 10)}\" y=\"{S(y2 + barH - 4)}\" font-size=\"15\">{V(r.Value)} <tspan fill=\"{deltaColor}\" font-size=\"13\">{E(delta)}</tspan></text>");
+            }
+            else
+            {
+                sb.Append($"<rect x=\"{S(barX)}\" y=\"{S(top + (rowH - barH) / 2)}\" width=\"{S(curLen)}\" height=\"{S(barH)}\" rx=\"5\" fill=\"{((r.Value ?? 0) < 0 ? Red : "url(#nsgrad)")}\"/>");
+                sb.Append($"<text class=\"val\" x=\"{S(barX + barW + 10)}\" y=\"{S(top + rowH / 2 + 6)}\" font-size=\"17\">{V(r.Value)}</text>");
+            }
+        }
+        sb.Append("</svg>");
+        return sb.ToString();
+    }
+
+    private string BuildLine(bool hasCompare)
+    {
+        var max = Max;
+        var w = 1000.0; var h = 320.0; var padL = 30.0; var padR = 30.0; var padT = 34.0; var padB = 50.0;
+        var n = Rows.Count;
+        double X(int i) => padL + i * (w - padL - padR) / (n - 1);
+        double Y(decimal v) => padT + (double)(1 - Math.Abs(v) / max) * (h - padT - padB);
+
+        var sb = new StringBuilder();
+        sb.Append($"<svg viewBox=\"0 0 {S(w)} {S(h)}\" role=\"img\" aria-label=\"Line chart\">");
+        for (var g = 0; g <= 4; g++)
+        {
+            var y = padT + g * (h - padT - padB) / 4;
+            sb.Append($"<line x1=\"{S(padL)}\" x2=\"{S(w - padR)}\" y1=\"{S(y)}\" y2=\"{S(y)}\" stroke=\"rgba(255,255,255,0.07)\"/>");
+        }
+        if (hasCompare)
+        {
+            var cmp = string.Join(" ", Rows.Select((r, i) => $"{S(X(i))},{S(Y(r.CompareValue ?? 0))}"));
+            sb.Append($"<polyline points=\"{cmp}\" fill=\"none\" stroke=\"{Violet}\" stroke-width=\"3\" stroke-linejoin=\"round\" stroke-dasharray=\"6 6\"/>");
+        }
+        var cur = string.Join(" ", Rows.Select((r, i) => $"{S(X(i))},{S(Y(r.Value ?? 0))}"));
+        sb.Append($"<polyline points=\"{cur}\" fill=\"none\" stroke=\"{Pink}\" stroke-width=\"4\" stroke-linejoin=\"round\"/>");
+        for (var i = 0; i < n; i++)
+        {
+            var r = Rows[i];
+            var anchor = i == 0 ? "start" : i == n - 1 ? "end" : "middle";
+            sb.Append($"<circle cx=\"{S(X(i))}\" cy=\"{S(Y(r.Value ?? 0))}\" r=\"6\" fill=\"{Pink}\"/>");
+            sb.Append($"<text class=\"val\" x=\"{S(X(i))}\" y=\"{S(Y(r.Value ?? 0) - 12)}\" font-size=\"15\" text-anchor=\"{anchor}\">{V(r.Value)}</text>");
+            sb.Append($"<text class=\"lbl\" x=\"{S(X(i))}\" y=\"{S(h - 18)}\" font-size=\"15\" text-anchor=\"{anchor}\">{E(r.Label)}</text>");
+        }
+        sb.Append("</svg>");
+        return sb.ToString();
+    }
+}

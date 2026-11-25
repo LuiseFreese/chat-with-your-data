@@ -1,0 +1,43 @@
+relationship SalesDate
+	fromColumn: Sales.'Order Date'
+	toColumn: Date.Date
+
+relationship ReturnsDate
+	fromColumn: Returns.'Return Date'
+	toColumn: Date.Date
+
+relationship AdjustmentsDate
+	fromColumn: Adjustments.'Adjustment Date'
+	toColumn: Date.Date
+
+relationship SalesCustomer
+	fromColumn: Sales.CustomerKey
+	toColumn: Customer.CustomerKey
+
+relationship SalesProduct
+	fromColumn: Sales.ProductKey
+	toColumn: Product.ProductKey
+
+relationship SalesRegion
+	fromColumn: Sales.RegionKey
+	toColumn: Region.RegionKey
+
+relationship ReturnsRegion
+	fromColumn: Returns.RegionKey
+	toColumn: Region.RegionKey
+
+relationship AdjustmentsRegion
+	fromColumn: Adjustments.RegionKey
+	toColumn: Region.RegionKey
+
+relationship SalesBu
+	fromColumn: Sales.BusinessUnitKey
+	toColumn: 'Business Unit'.BusinessUnitKey
+
+relationship ReturnsBu
+	fromColumn: Returns.BusinessUnitKey
+	toColumn: 'Business Unit'.BusinessUnitKey
+
+relationship AdjustmentsBu
+	fromColumn: Adjustments.BusinessUnitKey
+	toColumn: 'Business Unit'.BusinessUnitKey

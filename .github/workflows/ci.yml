@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: Build, test, local-demo smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Unit & integration tests (no cloud credentials required)
+        run: dotnet test --no-build --configuration Release --logger "console;verbosity=normal"
+
+      - name: Regenerate fabric artifacts and verify placeholders only
+        shell: pwsh
+        run: |
+          dotnet run --project tools/Northstar.Fabric.Tool --configuration Release -- generate
+          dotnet run --project tools/Northstar.Fabric.Tool --configuration Release -- stats
+          pwsh scripts/check-sanitized.ps1
+
+      - name: Local Demo Mode smoke test
+        shell: pwsh
+        run: |
+          $env:Demo__Mode = 'LocalDemo'
+          $app = Start-Process dotnet -ArgumentList 'run --project src/Northstar.Web --no-build --configuration Release --urls http://localhost:5130' -PassThru
+          try {
+            $ok = $false
+            foreach ($i in 1..30) {
+              Start-Sleep 2
+              try {
+                $home_ = Invoke-WebRequest http://localhost:5130 -UseBasicParsing -TimeoutSec 5
+                if ($home_.StatusCode -eq 200) { $ok = $true; break }
+              } catch { }
+            }
+            if (-not $ok) { throw 'App did not start' }
+            $r = Invoke-RestMethod -Method Post -Uri http://localhost:5130/api/query -ContentType 'application/json' -Body '{"question":"What was adjusted net revenue in Q3 2026?"}'
+            if (-not $r) { throw 'API returned no response' }
+            Write-Host "API outcome: $($r.outcome)"
+          } finally {
+            Stop-Process -Id $app.Id -Force -ErrorAction SilentlyContinue
+          }
+
+  dependency-scan:
+    name: Dependency vulnerability scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Restore
+        run: dotnet restore
+      - name: Check for vulnerable packages
+        shell: pwsh
+        run: |
+          $out = dotnet list package --vulnerable --include-transitive 2>&1 | Out-String
+          Write-Host $out
+          if ($out -match 'has the following vulnerable packages') { exit 1 }
+
+  secret-scan:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

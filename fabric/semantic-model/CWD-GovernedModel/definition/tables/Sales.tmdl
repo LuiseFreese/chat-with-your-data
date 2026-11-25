@@ -1,0 +1,139 @@
+/// Order lines (grain: order line). Home of all approved business measures.
+table Sales
+	sourceLineageTag: [cwd].[FactSalesOrderLine]
+
+	/// Order value at list price for all orders that were not cancelled, before discounts, returns and finance corrections. This is the number Sales reports. Owner: Head of Sales. Definition: SUM(order line quantity × list price) WHERE OrderStatus <> 'Cancelled'
+	measure 'Gross Revenue' = CALCULATE(SUM('Sales'[Gross Amount]), 'Sales'[Order Status] <> "Cancelled")
+		formatString: #,##0 €
+		displayFolder: Approved Business Measures
+
+	/// Sum of all discounts granted on order lines (volume, contract and campaign discounts). Owner: Head of Sales. Definition: SUM(order line discount amount)
+	measure 'Total Discounts' = CALCULATE(SUM('Sales'[Discount Amount]), 'Sales'[Order Status] <> "Cancelled")
+		formatString: #,##0 €
+		displayFolder: Approved Business Measures
+
+	/// Value of goods returned by customers, booked as credit notes. Owner: Head of Customer Service. Definition: SUM(credit note amount)
+	measure 'Total Returns' = SUM('Returns'[Amount])
+		formatString: #,##0 €
+		displayFolder: Approved Business Measures
+
+	/// Gross Revenue minus discounts and returns. The number Finance reports in the monthly close – before manual corrections. Owner: Head of Finance. Definition: [Gross Revenue] − [Total Discounts] − [Total Returns]
+	measure 'Net Revenue' = [Gross Revenue] - [Total Discounts] - [Total Returns]
+		formatString: #,##0 €
+		displayFolder: Approved Business Measures
+
+	/// Approved manual corrections booked by Finance (contract true-ups, pricing errors, bad debt). Historically maintained in an Excel workbook outside the pipeline. Owner: Head of Finance. Definition: SUM(adjustment amount) WHERE Status = 'Approved'
+	measure 'Finance Adjustments' = CALCULATE(SUM('Adjustments'[Amount]), 'Adjustments'[Status] = "Approved")
+		formatString: #,##0 €
+		displayFolder: Approved Business Measures
+
+	/// Finance adjustments that reached the pipeline before the Excel workbook was reconciled. Used by the Data Reconciliation screen to show the gap; not offered in chat. Owner: Head of Finance. Definition: SUM(adjustment amount) WHERE Status = 'Approved' AND Source = 'Pipeline'
+	measure 'Finance Adjustments Pipeline Only' = CALCULATE(SUM('Adjustments'[Amount]), 'Adjustments'[Status] = "Approved", 'Adjustments'[Source] = "Pipeline")
+		formatString: #,##0 €
+		displayFolder: Approved Business Measures
+
+	/// Net Revenue including approved finance adjustments. The number Management steers the company with. Owner: CFO. Definition: [Net Revenue] + [Finance Adjustments]
+	measure 'Adjusted Net Revenue' = [Net Revenue] + [Finance Adjustments]
+		formatString: #,##0 €
+		displayFolder: Approved Business Measures
+
+	/// Number of distinct orders that were not cancelled. Owner: Head of Sales. Definition: DISTINCTCOUNT(OrderId) WHERE OrderStatus <> 'Cancelled'
+	measure 'Order Count' = CALCULATE(DISTINCTCOUNT('Sales'[Order Id]), 'Sales'[Order Status] <> "Cancelled")
+		formatString: #,##0
+		displayFolder: Approved Business Measures
+
+	/// Net Revenue divided by Order Count. Owner: Head of Sales. Definition: DIVIDE([Net Revenue], [Order Count])
+	measure 'Average Order Value' = DIVIDE([Net Revenue], [Order Count])
+		formatString: #,##0.00 €
+		displayFolder: Approved Business Measures
+
+
+	column OrderLineKey
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: OrderLineKey
+		sourceLineageTag: OrderLineKey
+		isHidden
+
+	column 'Order Id'
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: Order Id
+		sourceLineageTag: Order Id
+		isHidden
+
+	column 'Order Date'
+		dataType: dateTime
+		summarizeBy: none
+		sourceColumn: Order Date
+		sourceLineageTag: Order Date
+		sourceProviderType: date
+		formatString: yyyy-mm-dd
+		isHidden
+
+	column CustomerKey
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: CustomerKey
+		sourceLineageTag: CustomerKey
+		isHidden
+
+	column ProductKey
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: ProductKey
+		sourceLineageTag: ProductKey
+		isHidden
+
+	column RegionKey
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: RegionKey
+		sourceLineageTag: RegionKey
+		isHidden
+
+	column BusinessUnitKey
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: BusinessUnitKey
+		sourceLineageTag: BusinessUnitKey
+		isHidden
+
+	column Quantity
+		dataType: int64
+		sourceColumn: Quantity
+		sourceLineageTag: Quantity
+		formatString: 0
+		summarizeBy: sum
+		isHidden
+
+	column 'Gross Amount'
+		dataType: double
+		sourceColumn: Gross Amount
+		sourceLineageTag: Gross Amount
+		formatString: #,##0.00 €
+		summarizeBy: sum
+		isHidden
+
+	column 'Discount Amount'
+		dataType: double
+		sourceColumn: Discount Amount
+		sourceLineageTag: Discount Amount
+		formatString: #,##0.00 €
+		summarizeBy: sum
+		isHidden
+
+	/// Completed, Pending or Cancelled. Cancelled orders are excluded from every revenue measure.
+	column 'Order Status'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Order Status
+		sourceLineageTag: Order Status
+
+	partition Sales = entity
+		mode: directLake
+		source
+			entityName: FactSalesOrderLine
+			schemaName: cwd
+			expressionSource: DatabaseQuery
+

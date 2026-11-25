@@ -1,0 +1,72 @@
+/// Calendar 2025–2026. All measures are filtered through this table.
+table Date
+	dataCategory: Time
+	sourceLineageTag: [cwd].[DimDate]
+
+	column Date
+		dataType: dateTime
+		summarizeBy: none
+		sourceColumn: Date
+		sourceLineageTag: Date
+		sourceProviderType: date
+		formatString: yyyy-mm-dd
+		isKey
+
+	column Year
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: Year
+		sourceLineageTag: Year
+		formatString: 0
+
+	column Quarter
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: Quarter
+		sourceLineageTag: Quarter
+		formatString: 0
+
+	/// Calendar quarter, e.g. Q3 2026
+	column 'Quarter Label'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Quarter Label
+		sourceLineageTag: Quarter Label
+		sortByColumn: 'Year Month'
+
+	column Month
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: Month
+		sourceLineageTag: Month
+		formatString: 0
+
+	column 'Month Label'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Month Label
+		sourceLineageTag: Month Label
+		sortByColumn: 'Year Month'
+
+	column 'Month Name'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Month Name
+		sourceLineageTag: Month Name
+		sortByColumn: Month
+
+	column 'Year Month'
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: Year Month
+		sourceLineageTag: Year Month
+		formatString: 0
+		isHidden
+
+	partition Date = entity
+		mode: directLake
+		source
+			entityName: DimDate
+			schemaName: cwd
+			expressionSource: DatabaseQuery
+

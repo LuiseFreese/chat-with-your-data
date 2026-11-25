@@ -1,0 +1,73 @@
+CustomerKey,CustomerName,Segment,Region
+1001,"Spree Outdoor GmbH",Dealer,East
+1002,"Elbe Cycling B.V.",Dealer,North
+1003,"Rhein Zweirad B.V.",Retail,South
+1004,"Elbe Zweirad e.K.",Dealer,West
+1005,"Donau Zweirad S.à r.l.",Dealer,East
+1006,"Nord Mobility S.à r.l.",Business,North
+1007,"Alpen Cycling KG",Business,South
+1008,"Isar Outdoor S.à r.l.",Retail,West
+1009,"Alpen Cycles KG",Retail,East
+1010,"Tauern Bikes AG",Business,North
+1011,"Neckar Cycling B.V.",Retail,South
+1012,"Rhein Velo GmbH",Retail,West
+1013,"Nord Outdoor SE",Dealer,East
+1014,"Donau Mobility GmbH",Business,North
+1015,"Main Radsport & Co.",Business,South
+1016,"Hanse Outdoor B.V.",Retail,West
+1017,"Baltic Outdoor GmbH",Dealer,East
+1018,"Weser Outdoor GmbH",Dealer,North
+1019,"Neckar Cycles SE",Retail,South
+1020,"Baltic Bikes B.V.",Business,West
+1021,"Elbe Radsport S.à r.l.",Business,East
+1022,"Neckar Cycles AG",Dealer,North
+1023,"Alpen Cycling SE",Retail,South
+1024,"Neckar Rad SE",Retail,West
+1025,"Rhein Sports S.à r.l.",Dealer,East
+1026,"Elbe Cycles SE",Dealer,North
+1027,"Rhein Cycling B.V.",Dealer,South
+1028,"Neckar Zweirad S.à r.l.",Retail,West
+1029,"Baltic Cycling e.K.",Dealer,East
+1030,"Baltic Cycling KG",Business,North
+1031,"Weser Rad B.V.",Retail,South
+1032,"Mosel Sports GmbH",Retail,West
+1033,"Mosel Bikes B.V.",Dealer,East
+1034,"Hanse Bikes & Co.",Dealer,North
+1035,"Baltic Bikes AG",Business,South
+1036,"Ruhr Cycling & Co.",Business,West
+1037,"Weser Radsport GmbH",Business,East
+1038,"Isar Bikes GmbH",Dealer,North
+1039,"Spree Cycles e.K.",Dealer,South
+1040,"Mosel Mobility KG",Business,West
+1041,"Baltic Radsport B.V.",Business,East
+1042,"Nord Outdoor AG",Dealer,North
+1043,"Main Mobility AG",Retail,South
+1044,"Nord Bikes GmbH",Dealer,West
+1045,"Ruhr Sports S.à r.l.",Dealer,East
+1046,"Isar Mobility & Co.",Retail,North
+1047,"Alpen Cycles B.V.",Dealer,South
+1048,"Baltic Rad AG",Business,West
+1049,"Hanse Zweirad S.à r.l.",Retail,East
+1050,"Ruhr Outdoor AG",Dealer,North
+1051,"Rhein Mobility e.K.",Business,South
+1052,"Donau Sports GmbH",Dealer,West
+1053,"Mosel Cycles e.K.",Business,East
+1054,"Nord Bikes B.V.",Retail,North
+1055,"Neckar Mobility KG",Business,South
+1056,"Baltic Sports SE",Dealer,West
+1057,"Tauern Zweirad & Co.",Dealer,East
+1058,"Nord Mobility & Co.",Business,North
+1059,"Neckar Bikes SE",Retail,South
+1060,"Elbe Velo B.V.",Retail,West
+1061,"Neckar Zweirad B.V.",Retail,East
+1062,"Rhein Mobility S.à r.l.",Retail,North
+1063,"Nord Velo GmbH",Dealer,South
+1064,"Donau Radsport & Co.",Dealer,West
+1065,"Alpen Mobility S.à r.l.",Dealer,East
+1066,"Isar Sports AG",Retail,North
+1067,"Mosel Sports KG",Dealer,South
+1068,"Weser Radsport & Co.",Dealer,West
+1069,"Donau Cycles GmbH",Retail,East
+1070,"Hanse Bikes KG",Retail,North
+1071,"Elbe Zweirad AG",Business,South
+1072,"Tauern Sports B.V.",Business,West

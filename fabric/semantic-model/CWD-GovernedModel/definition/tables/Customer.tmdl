@@ -1,0 +1,38 @@
+/// Customers. No personal contact data is modelled – by design.
+table Customer
+	sourceLineageTag: [cwd].[DimCustomer]
+
+	column CustomerKey
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: CustomerKey
+		sourceLineageTag: CustomerKey
+		isHidden
+
+	column 'Customer Name'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Customer Name
+		sourceLineageTag: Customer Name
+
+	/// Commercial segment (Business, Dealer, Retail)
+	column Segment
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Segment
+		sourceLineageTag: Segment
+
+	column Region
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Region
+		sourceLineageTag: Region
+		isHidden
+
+	partition Customer = entity
+		mode: directLake
+		source
+			entityName: DimCustomer
+			schemaName: cwd
+			expressionSource: DatabaseQuery
+

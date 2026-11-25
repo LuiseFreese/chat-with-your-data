@@ -1,0 +1,167 @@
+@{
+    var result = Response.Result!;
+    var ex = Response.Explanation!;
+    var query = Response.Query!;
+    var currency = query.Metric.IsCurrency;
+    var isSingle = result.GroupColumns.Count == 0 && result.Rows.Count == 1;
+    var showReconciliation = query.Metric.Id == "finance_adjustments" || Response.Record.Question.Contains("different", StringComparison.OrdinalIgnoreCase);
+    var chartRows = result.Rows.Select(r => new ChartRow(string.Join(" · ", r.Keys), r.Value, r.CompareValue)).ToList();
+    var laterIsCompare = query.ComparePeriod is not null && query.ComparePeriod.Start > query.Period.Start;
+    var deltaLabel = query.ComparePeriod is null ? "Δ" : laterIsCompare ? $"Δ {ex.ComparePeriodLabel} vs {ex.PeriodLabel}" : $"Δ {ex.PeriodLabel} vs {ex.ComparePeriodLabel}";
+    string Delta(decimal? value, decimal? compare) => laterIsCompare ? Format.DeltaPercent(compare, value) : Format.DeltaPercent(value, compare);
+    bool Up(decimal? value, decimal? compare) => laterIsCompare ? compare >= value : value >= compare;
+    var line = query.Visualization == VisualizationKind.Line || (result.GroupColumns.Count == 1 && (result.GroupColumns[0] is "Month" or "Quarter") && result.Rows.Count > 2 && !result.Rows.Any(r => r.CompareValue is not null));
+}
+
+<div class="card accent-cyan fade-in">
+    <div class="card-head">
+        <h3>
+            <span class="badge cyan">Production</span>
+            @ex.MetricName
+            <span class="muted" style="font-weight:400"> · @ex.PeriodLabel@(ex.ComparePeriodLabel is null ? "" : $" vs {ex.ComparePeriodLabel}")</span>
+        </h3>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+            @if (DefinitionUsed is not null)
+            {
+                <span class="badge pink">Definition used: @DefinitionUsed</span>
+            }
+            @foreach (var f in ex.AppliedFilters)
+            {
+                <span class="badge violet">@f</span>
+            }
+            <span class="badge">@Format.Ms(Response.Record.TotalDuration)</span>
+        </div>
+    </div>
+
+    @if (isSingle)
+    {
+        var row = result.Rows[0];
+        <div class="numbers">
+            <div>
+                <div class="big-label">@result.ValueLabel</div>
+                <div class="big-number cyan">@Format.Value(row.Value, currency)</div>
+            </div>
+            @if (row.CompareValue is not null)
+            {
+                <div>
+                    <div class="big-label">@result.CompareValueLabel</div>
+                    <div class="big-number" style="color:var(--violet)">@Format.Value(row.CompareValue, currency)</div>
+                </div>
+                <div>
+                    <div class="big-label">@deltaLabel</div>
+                    <div class="delta @(Up(row.Value, row.CompareValue) ? "up" : "down")" style="font-size:1.8rem">@Delta(row.Value, row.CompareValue)</div>
+                </div>
+            }
+        </div>
+        @if (row.CompareValue is not null)
+        {
+            <BarChart Rows="new[] { new ChartRow(ex.PeriodLabel, row.Value, row.CompareValue) }" Currency="currency" ValueLabel="@result.ValueLabel" CompareLabel="@result.CompareValueLabel" DeltaFromCompare="laterIsCompare" />
+        }
+    }
+    else if (result.Rows.Count == 0)
+    {
+        <div class="callout amber"><strong>No rows.</strong><span>The query ran successfully but returned no data for your access scope and filters.</span></div>
+    }
+    else
+    {
+        @if (query.Metric.Id != "average_order_value")
+        {
+            <div class="numbers">
+                <div>
+                    <div class="big-label">Total · @result.ValueLabel</div>
+                    <div class="big-number cyan">@Format.Value(result.Rows.Sum(r => r.Value ?? 0), currency)</div>
+                </div>
+                @if (result.Rows.Any(r => r.CompareValue is not null))
+                {
+                    var cmpTotal = result.Rows.Sum(r => r.CompareValue ?? 0);
+                    var curTotal = result.Rows.Sum(r => r.Value ?? 0);
+                    <div>
+                        <div class="big-label">Total · @result.CompareValueLabel</div>
+                        <div class="big-number" style="color:var(--violet)">@Format.Value(cmpTotal, currency)</div>
+                    </div>
+                    <div>
+                        <div class="big-label">@deltaLabel</div>
+                        <div class="delta @(Up(curTotal, cmpTotal) ? "up" : "down")" style="font-size:1.8rem">@Delta(curTotal, cmpTotal)</div>
+                    </div>
+                }
+            </div>
+        }
+
+        <BarChart Rows="chartRows" Currency="currency" ValueLabel="@result.ValueLabel" CompareLabel="@result.CompareValueLabel" DeltaFromCompare="laterIsCompare" Line="line" />
+
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        @foreach (var c in result.GroupColumns) { <th>@c</th> }
+                        <th class="num">@result.ValueLabel</th>
+                        @if (result.CompareValueLabel is not null)
+                        {
+                            <th class="num">@result.CompareValueLabel</th>
+                            <th class="num">@deltaLabel</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in result.Rows)
+                    {
+                        <tr>
+                            @foreach (var k in row.Keys) { <td>@k</td> }
+                            <td class="num">@Format.Value(row.Value, currency)</td>
+                            @if (result.CompareValueLabel is not null)
+                            {
+                                <td class="num">@Format.Value(row.CompareValue, currency)</td>
+                                <td class="num delta @(Up(row.Value, row.CompareValue) ? "up" : "down")">@Delta(row.Value, row.CompareValue)</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @if (result.Truncated)
+    {
+        <p class="small muted" style="margin-top:.5rem">Result was truncated to the maximum number of rows.</p>
+    }
+    @if (result.Warnings.Count > 0)
+    {
+        <ul class="warnings">
+            @foreach (var w in result.Warnings) { <li>@w</li> }
+        </ul>
+    }
+
+    @if (showReconciliation)
+    {
+        <div class="callout pink" style="margin-top:1rem">
+            <div>
+                <strong>Sales, Finance and Management each report a different “revenue”.</strong>
+                <div class="small">The Data Reconciliation screen bridges Gross → Net → Adjusted Net Revenue and shows the Excel corrections that were originally missing from the pipeline.</div>
+            </div>
+            <a class="btn btn-sm" href="reconciliation" style="margin-left:auto;white-space:nowrap">Open Data Reconciliation →</a>
+        </div>
+    }
+
+    <div class="explain">
+        <h3>What this number means</h3>
+        <div class="explain-grid">
+            <div class="item"><b>Metric</b>@ex.MetricName</div>
+            <div class="item"><b>Business owner</b>@ex.BusinessOwner</div>
+            <div class="item" style="grid-column:1/-1"><b>Definition</b>@ex.MetricDefinition</div>
+            <div class="item"><b>Formula</b><code class="inline">@ex.Formula</code></div>
+            <div class="item"><b>Semantic measure</b><code class="inline">[@ex.SemanticMeasure]</code></div>
+            <div class="item"><b>Period(s)</b>@ex.PeriodLabel@(ex.ComparePeriodLabel is null ? "" : $" vs {ex.ComparePeriodLabel}")</div>
+            <div class="item"><b>Grouped by</b>@(ex.Dimensions.Count == 0 ? "–" : string.Join(", ", ex.Dimensions))</div>
+            <div class="item"><b>Filters</b>@(ex.AppliedFilters.Count == 0 ? "none" : string.Join("; ", ex.AppliedFilters))</div>
+            <div class="item"><b>Data origin</b>@ex.DataOrigin</div>
+            <div class="item" style="grid-column:1/-1"><b>Security context</b>@(ex.SecurityContext ?? "–")</div>
+        </div>
+    </div>
+
+    <QueryInspectorPanel Record="Response.Record" />
+</div>
+
+@code {
+    [Parameter, EditorRequired] public QueryResponse Response { get; set; } = default!;
+    [Parameter] public string? DefinitionUsed { get; set; }
+}

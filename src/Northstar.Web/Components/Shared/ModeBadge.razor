@@ -1,0 +1,16 @@
+@inject IOptions<DemoOptions> Demo
+
+@if (Demo.Value.ExecutionMode == ExecutionMode.LocalDemo)
+{
+    <div class="mode-badge amber" title="All numbers come from a local synthetic dataset. Nothing is sent to Microsoft Fabric.">
+        <span class="dot"></span>
+        <div><strong>LOCAL DEMO MODE</strong><span class="sub">– synthetic data</span></div>
+    </div>
+}
+else
+{
+    <div class="mode-badge cyan" title="Queries run against Microsoft Fabric with the signed-in user's identity.">
+        <span class="dot"></span>
+        <div><strong>CONNECTED</strong><span class="sub">– Microsoft Fabric</span></div>
+    </div>
+}

@@ -1,0 +1,22 @@
+# Normalize line endings; mark binary assets.
+* text=auto
+
+*.cs text
+*.razor text
+*.json text
+*.md text
+*.sql text
+*.tmdl text
+*.csv text
+*.yml text
+*.yaml text
+*.ps1 text
+*.cmd text eol=crlf
+*.sh text eol=lf
+
+*.xlsx binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff binary
+*.woff2 binary

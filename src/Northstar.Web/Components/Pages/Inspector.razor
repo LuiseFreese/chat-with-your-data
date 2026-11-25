@@ -1,0 +1,68 @@
+@page "/inspector"
+@inject IQueryAuditStore Audit
+
+<PageTitle>Query Inspector · Northstar</PageTitle>
+
+<div class="page-head">
+    <div>
+        <h1 class="grad-text">Query Inspector</h1>
+        <p class="lead">Every request that went through the governed pipeline – including rejected ones. Click a row to see the parsed intent, validation results and the generated DAX.</p>
+    </div>
+    <button class="btn" type="button" @onclick="Refresh">↻ Refresh</button>
+</div>
+
+<div class="card">
+    @if (records.Count == 0)
+    {
+        <p class="muted">No queries recorded yet. Ask something on the <a href="">Chat with Data</a> page first.</p>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Time</th><th>Question</th><th>User</th><th>Outcome</th><th>Mode</th><th>Metric</th><th class="num">Total</th><th>Correlation id</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in records)
+                    {
+                        <tr class="clickable" @onclick="() => Toggle(r.Id)">
+                            <td class="nowrap mono small">@Format.Time(r.Timestamp)</td>
+                            <td>@r.Question</td>
+                            <td class="small muted">@r.User</td>
+                            <td><span class="badge @OutcomeCss(r)">@r.Outcome</span></td>
+                            <td><span class="badge @(r.Mode == "Connected" ? "cyan" : "amber")">@r.Mode</span></td>
+                            <td>@(r.SelectedMetric ?? "–")</td>
+                            <td class="num mono">@Format.Ms(r.TotalDuration)</td>
+                            <td class="mono small dim">@r.CorrelationId</td>
+                        </tr>
+                        @if (expanded == r.Id)
+                        {
+                            <tr>
+                                <td colspan="8" style="padding:0 .5rem 1rem">
+                                    <QueryInspectorPanel Record="r" InitiallyOpen="true" @key="r.Id" />
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    private IReadOnlyList<QueryExecutionRecord> records = [];
+    private Guid? expanded;
+
+    protected override void OnInitialized() => Refresh();
+
+    private void Refresh() => records = Audit.Recent(50);
+
+    private void Toggle(Guid id) => expanded = expanded == id ? null : id;
+
+    private static string OutcomeCss(QueryExecutionRecord r) =>
+        r.Error is not null ? "red" : r.Outcome.StartsWith("Answer") ? "cyan" : r.Outcome.StartsWith("Rejected") ? "red" : "violet";
+}

@@ -1,0 +1,53 @@
+@inject IUserContextAccessor Users
+@inject IOptions<DemoOptions> Demo
+@inject PresentationState Presentation
+@implements IDisposable
+
+<header class="topbar">
+    <div class="user-pill">
+        <div class="avatar" aria-hidden="true">@Format.Initials(user.DisplayName)</div>
+        <div>
+            <div class="user-name">
+                @user.DisplayName
+                @if (user.IsSimulated)
+                {
+                    <span class="badge amber">simulated persona</span>
+                }
+                else
+                {
+                    <span class="badge cyan">signed in</span>
+                }
+            </div>
+            <div class="user-role">@user.Role · access: @user.AccessDescription</div>
+        </div>
+    </div>
+    <div class="spacer"></div>
+    @if (Demo.Value.ExecutionMode == ExecutionMode.LocalDemo)
+    {
+        <PersonaSwitcher />
+    }
+    else
+    {
+        <a class="btn btn-ghost btn-sm" href="MicrosoftIdentity/Account/SignOut" data-enhance-nav="false">Sign out</a>
+    }
+</header>
+
+@code {
+    private UserContext user = new("unknown", "Unknown user", "–", false, null);
+
+    protected override void OnInitialized()
+    {
+        Load();
+        Presentation.PersonaChanged += OnPersonaChanged;
+    }
+
+    private void Load()
+    {
+        try { user = Users.Current; }
+        catch { /* identity not resolvable in this circuit – keep the placeholder */ }
+    }
+
+    private void OnPersonaChanged() => _ = InvokeAsync(() => { Load(); StateHasChanged(); });
+
+    public void Dispose() => Presentation.PersonaChanged -= OnPersonaChanged;
+}

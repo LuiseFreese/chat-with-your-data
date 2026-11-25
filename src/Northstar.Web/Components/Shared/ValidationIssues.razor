@@ -1,0 +1,27 @@
+@if (Issues.Count > 0)
+{
+    <ul class="issues">
+        @foreach (var issue in Issues)
+        {
+            <li>
+                <span class="badge sev @Css(issue.Severity)">@issue.Severity</span>
+                <span>@issue.Message <code>@issue.Code</code></span>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p class="dim small">No validation results recorded.</p>
+}
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<ValidationIssue> Issues { get; set; } = [];
+
+    private static string Css(ValidationSeverity s) => s switch
+    {
+        ValidationSeverity.Error => "red",
+        ValidationSeverity.Warning => "amber",
+        _ => "cyan",
+    };
+}

@@ -1,0 +1,24 @@
+/// Security mapping user → region used by the Regional Reader role.
+table 'Region Access'
+	isHidden
+	sourceLineageTag: [cwd].[RegionAccess]
+
+	column 'User Principal Name'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: User Principal Name
+		sourceLineageTag: User Principal Name
+
+	column Region
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Region
+		sourceLineageTag: Region
+
+	partition 'Region Access' = entity
+		mode: directLake
+		source
+			entityName: RegionAccess
+			schemaName: cwd
+			expressionSource: DatabaseQuery
+

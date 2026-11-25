@@ -1,0 +1,374 @@
+{
+  "metrics": [
+    {
+      "Id": "gross_revenue",
+      "BusinessName": "Gross Revenue",
+      "Description": "Order value at list price for all orders that were not cancelled, before discounts, returns and finance corrections. This is the number Sales reports.",
+      "Formula": "SUM(order line quantity \u00D7 list price) WHERE OrderStatus \u003C\u003E \u0027Cancelled\u0027",
+      "SemanticMeasure": "Gross Revenue",
+      "BusinessOwner": "Head of Sales",
+      "RelatedMetrics": [
+        "net_revenue",
+        "total_discounts"
+      ],
+      "ApprovedForConversationalQuerying": true,
+      "Synonyms": [
+        "gross revenue",
+        "gross sales",
+        "sales revenue",
+        "bookings",
+        "order value",
+        "gross order value"
+      ],
+      "AmbiguityGroup": "revenue",
+      "FormatString": "#,##0 \u20AC",
+      "ConfusionNote": "Sales calls this \u0027revenue\u0027. Finance never does.",
+      "LineGrain": true,
+      "IsCurrency": true
+    },
+    {
+      "Id": "total_discounts",
+      "BusinessName": "Total Discounts",
+      "Description": "Sum of all discounts granted on order lines (volume, contract and campaign discounts).",
+      "Formula": "SUM(order line discount amount)",
+      "SemanticMeasure": "Total Discounts",
+      "BusinessOwner": "Head of Sales",
+      "RelatedMetrics": [
+        "gross_revenue",
+        "net_revenue"
+      ],
+      "ApprovedForConversationalQuerying": true,
+      "Synonyms": [
+        "discounts",
+        "total discounts",
+        "discount amount",
+        "rebates"
+      ],
+      "AmbiguityGroup": null,
+      "FormatString": "#,##0 \u20AC",
+      "ConfusionNote": null,
+      "LineGrain": true,
+      "IsCurrency": true
+    },
+    {
+      "Id": "total_returns",
+      "BusinessName": "Total Returns",
+      "Description": "Value of goods returned by customers, booked as credit notes.",
+      "Formula": "SUM(credit note amount)",
+      "SemanticMeasure": "Total Returns",
+      "BusinessOwner": "Head of Customer Service",
+      "RelatedMetrics": [
+        "net_revenue"
+      ],
+      "ApprovedForConversationalQuerying": true,
+      "Synonyms": [
+        "returns",
+        "total returns",
+        "credit notes",
+        "refunds"
+      ],
+      "AmbiguityGroup": null,
+      "FormatString": "#,##0 \u20AC",
+      "ConfusionNote": null,
+      "LineGrain": false,
+      "IsCurrency": true
+    },
+    {
+      "Id": "net_revenue",
+      "BusinessName": "Net Revenue",
+      "Description": "Gross Revenue minus discounts and returns. The number Finance reports in the monthly close \u2013 before manual corrections.",
+      "Formula": "[Gross Revenue] \u2212 [Total Discounts] \u2212 [Total Returns]",
+      "SemanticMeasure": "Net Revenue",
+      "BusinessOwner": "Head of Finance",
+      "RelatedMetrics": [
+        "gross_revenue",
+        "adjusted_net_revenue"
+      ],
+      "ApprovedForConversationalQuerying": true,
+      "Synonyms": [
+        "net revenue",
+        "net sales",
+        "revenue after discounts",
+        "invoiced revenue",
+        "finance revenue"
+      ],
+      "AmbiguityGroup": "revenue",
+      "FormatString": "#,##0 \u20AC",
+      "ConfusionNote": "Operational apps often use \u0027net\u0027 to mean \u0027after discounts\u0027 but forget returns.",
+      "LineGrain": false,
+      "IsCurrency": true
+    },
+    {
+      "Id": "finance_adjustments",
+      "BusinessName": "Finance Adjustments",
+      "Description": "Approved manual corrections booked by Finance (contract true-ups, pricing errors, bad debt). Historically maintained in an Excel workbook outside the pipeline.",
+      "Formula": "SUM(adjustment amount) WHERE Status = \u0027Approved\u0027",
+      "SemanticMeasure": "Finance Adjustments",
+      "BusinessOwner": "Head of Finance",
+      "RelatedMetrics": [
+        "adjusted_net_revenue",
+        "net_revenue"
+      ],
+      "ApprovedForConversationalQuerying": true,
+      "Synonyms": [
+        "finance adjustments",
+        "adjustments",
+        "corrections",
+        "manual corrections",
+        "excel corrections"
+      ],
+      "AmbiguityGroup": null,
+      "FormatString": "#,##0 \u20AC",
+      "ConfusionNote": null,
+      "LineGrain": false,
+      "IsCurrency": true
+    },
+    {
+      "Id": "adjusted_net_revenue",
+      "BusinessName": "Adjusted Net Revenue",
+      "Description": "Net Revenue including approved finance adjustments. The number Management steers the company with.",
+      "Formula": "[Net Revenue] \u002B [Finance Adjustments]",
+      "SemanticMeasure": "Adjusted Net Revenue",
+      "BusinessOwner": "CFO",
+      "RelatedMetrics": [
+        "net_revenue",
+        "finance_adjustments"
+      ],
+      "ApprovedForConversationalQuerying": true,
+      "Synonyms": [
+        "adjusted net revenue",
+        "adjusted revenue",
+        "management revenue",
+        "revenue incl. adjustments",
+        "corrected revenue"
+      ],
+      "AmbiguityGroup": "revenue",
+      "FormatString": "#,##0 \u20AC",
+      "ConfusionNote": null,
+      "LineGrain": false,
+      "IsCurrency": true
+    },
+    {
+      "Id": "order_count",
+      "BusinessName": "Order Count",
+      "Description": "Number of distinct orders that were not cancelled.",
+      "Formula": "DISTINCTCOUNT(OrderId) WHERE OrderStatus \u003C\u003E \u0027Cancelled\u0027",
+      "SemanticMeasure": "Order Count",
+      "BusinessOwner": "Head of Sales",
+      "RelatedMetrics": [
+        "average_order_value"
+      ],
+      "ApprovedForConversationalQuerying": true,
+      "Synonyms": [
+        "orders",
+        "order count",
+        "number of orders",
+        "how many orders"
+      ],
+      "AmbiguityGroup": null,
+      "FormatString": "#,##0",
+      "ConfusionNote": null,
+      "LineGrain": true,
+      "IsCurrency": false
+    },
+    {
+      "Id": "average_order_value",
+      "BusinessName": "Average Order Value",
+      "Description": "Net Revenue divided by Order Count.",
+      "Formula": "DIVIDE([Net Revenue], [Order Count])",
+      "SemanticMeasure": "Average Order Value",
+      "BusinessOwner": "Head of Sales",
+      "RelatedMetrics": [
+        "net_revenue",
+        "order_count"
+      ],
+      "ApprovedForConversationalQuerying": true,
+      "Synonyms": [
+        "average order value",
+        "aov",
+        "avg order",
+        "basket size"
+      ],
+      "AmbiguityGroup": null,
+      "FormatString": "#,##0 \u20AC",
+      "ConfusionNote": null,
+      "LineGrain": false,
+      "IsCurrency": true
+    },
+    {
+      "Id": "finance_adjustments_pipeline_only",
+      "BusinessName": "Finance Adjustments (pipeline feed only)",
+      "Description": "Finance adjustments that reached the pipeline before the Excel workbook was reconciled. Used by the Data Reconciliation screen to show the gap; not offered in chat.",
+      "Formula": "SUM(adjustment amount) WHERE Status = \u0027Approved\u0027 AND Source = \u0027Pipeline\u0027",
+      "SemanticMeasure": "Finance Adjustments Pipeline Only",
+      "BusinessOwner": "Head of Finance",
+      "RelatedMetrics": [
+        "finance_adjustments"
+      ],
+      "ApprovedForConversationalQuerying": false,
+      "Synonyms": [],
+      "AmbiguityGroup": null,
+      "FormatString": "#,##0 \u20AC",
+      "ConfusionNote": null,
+      "LineGrain": false,
+      "IsCurrency": true
+    },
+    {
+      "Id": "customer_contact_details",
+      "BusinessName": "Customer Contact Details",
+      "Description": "Personal contact data of customers. Not a metric \u2013 exists in the catalog only to document that it is blocked.",
+      "Formula": "n/a",
+      "SemanticMeasure": "n/a",
+      "BusinessOwner": "Data Protection Officer",
+      "RelatedMetrics": [],
+      "ApprovedForConversationalQuerying": false,
+      "Synonyms": [
+        "contact details",
+        "email addresses",
+        "phone numbers",
+        "customer records",
+        "personal data",
+        "private contact"
+      ],
+      "AmbiguityGroup": null,
+      "FormatString": "#,##0 \u20AC",
+      "ConfusionNote": null,
+      "LineGrain": false,
+      "IsCurrency": true
+    }
+  ],
+  "dimensions": [
+    {
+      "Id": "region",
+      "BusinessName": "Region",
+      "SemanticTable": "Region",
+      "SemanticColumn": "Region",
+      "Description": "Sales region of the customer",
+      "KnownValues": [
+        "East",
+        "North",
+        "South",
+        "West"
+      ],
+      "Synonyms": [
+        "region",
+        "regions",
+        "regional",
+        "area"
+      ],
+      "LineGrain": false
+    },
+    {
+      "Id": "business_unit",
+      "BusinessName": "Business Unit",
+      "SemanticTable": "Business Unit",
+      "SemanticColumn": "Business Unit",
+      "Description": "Legal/operational unit that booked the order",
+      "KnownValues": [
+        "Northstar Bikes",
+        "Northstar Parts",
+        "Northstar Services"
+      ],
+      "Synonyms": [
+        "business unit",
+        "business units",
+        "bu",
+        "division"
+      ],
+      "LineGrain": false
+    },
+    {
+      "Id": "product_category",
+      "BusinessName": "Product Category",
+      "SemanticTable": "Product",
+      "SemanticColumn": "Category",
+      "Description": "Product category",
+      "KnownValues": [
+        "City",
+        "E-Bike",
+        "Gravel",
+        "Road",
+        "Urban",
+        "Components",
+        "Accessories",
+        "Service"
+      ],
+      "Synonyms": [
+        "category",
+        "categories",
+        "product category",
+        "product categories",
+        "product line"
+      ],
+      "LineGrain": true
+    },
+    {
+      "Id": "customer_segment",
+      "BusinessName": "Customer Segment",
+      "SemanticTable": "Customer",
+      "SemanticColumn": "Segment",
+      "Description": "Commercial segment of the customer",
+      "KnownValues": [
+        "Business",
+        "Dealer",
+        "Retail"
+      ],
+      "Synonyms": [
+        "segment",
+        "segments",
+        "customer segment",
+        "customer type"
+      ],
+      "LineGrain": true
+    },
+    {
+      "Id": "quarter",
+      "BusinessName": "Quarter",
+      "SemanticTable": "Date",
+      "SemanticColumn": "Quarter Label",
+      "Description": "Calendar quarter",
+      "KnownValues": [],
+      "Synonyms": [
+        "quarter",
+        "quarters",
+        "quarterly",
+        "per quarter"
+      ],
+      "LineGrain": false
+    },
+    {
+      "Id": "month",
+      "BusinessName": "Month",
+      "SemanticTable": "Date",
+      "SemanticColumn": "Month Label",
+      "Description": "Calendar month",
+      "KnownValues": [],
+      "Synonyms": [
+        "month",
+        "months",
+        "monthly",
+        "per month"
+      ],
+      "LineGrain": false
+    }
+  ],
+  "ambiguousTerms": [
+    {
+      "Term": "revenue",
+      "Question": "Which definition of revenue would you like to use?",
+      "CandidateMetricIds": [
+        "gross_revenue",
+        "net_revenue",
+        "adjusted_net_revenue"
+      ],
+      "Synonyms": [
+        "revenue",
+        "turnover",
+        "sales",
+        "umsatz",
+        "how much did we make",
+        "how much did we earn"
+      ]
+    }
+  ]
+}

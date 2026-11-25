@@ -1,0 +1,203 @@
+@page "/reconciliation"
+@inject ReconciliationService Service
+@implements IDisposable
+
+<PageTitle>Data Reconciliation · Northstar</PageTitle>
+
+<div class="page-head">
+    <div>
+        <h1 class="grad-text">Data Reconciliation</h1>
+        <p class="lead">Why Sales, Finance and Management each report a different “revenue” – and where the Excel corrections enter the governed pipeline. Same measures, same provider, same identity as the chat.</p>
+    </div>
+</div>
+
+<div class="controls">
+    <label class="field">Year
+        <select class="select" value="@year" @onchange="OnYear">
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+        </select>
+    </label>
+    <label class="field">Quarter
+        <select class="select" value="@quarter" @onchange="OnQuarter">
+            <option value="0">All quarters</option>
+            <option value="1">Q1</option><option value="2">Q2</option><option value="3">Q3</option><option value="4">Q4</option>
+        </select>
+    </label>
+    <label class="field">Region
+        <select class="select" value="@region" @onchange="OnRegion">
+            <option value="">All regions</option>
+            @foreach (var r in SyntheticDataset.Regions) { <option value="@r">@r</option> }
+        </select>
+    </label>
+    @if (loading) { <div class="thinking" style="margin:0 0 .4rem"><span class="spinner"></span> Calculating bridge…</div> }
+</div>
+
+@if (error is not null)
+{
+    <div class="card accent-red"><h3>Reconciliation unavailable</h3><p>@error</p></div>
+}
+else if (report is { } r)
+{
+    var gross = Math.Max(1m, Math.Abs(r.GrossRevenue));
+    string W(decimal v) => Format.Pct((double)Math.Min(1m, Math.Abs(v) / gross));
+
+    <div class="grid-3">
+        @foreach (var line in r.Lines)
+        {
+            var colour = line.MetricId switch { "gross_revenue" => "pink", "net_revenue" => "", _ => "cyan" };
+            var dept = line.MetricId switch { "gross_revenue" => "Sales", "net_revenue" => "Finance", _ => "Management" };
+            <div class="card @(line.MetricId == "adjusted_net_revenue" ? "accent-cyan" : line.MetricId == "gross_revenue" ? "accent-pink" : "")">
+                <div class="big-label">@line.Name · @dept</div>
+                <div class="big-number @colour" style="@(colour == "" ? "color:var(--violet)" : "")">@Format.Currency(line.Value)</div>
+                <p class="small muted" style="margin:.5rem 0 0">@line.Definition</p>
+                <p class="small" style="margin:.3rem 0 0">Owner: <strong>@line.Owner</strong></p>
+            </div>
+        }
+    </div>
+
+    <div class="card" style="margin-top:1rem">
+        <div class="card-head">
+            <h2>Revenue bridge · @r.Period.Label@(string.IsNullOrEmpty(region) ? "" : $" · {region}")</h2>
+            <span class="badge">bars scaled to Gross Revenue</span>
+        </div>
+        <div class="bridge">
+            <div class="bridge-row">
+                <div class="name"><span class="op"></span>Gross Revenue</div>
+                <div class="bar"><i class="total" style="width:@W(r.GrossRevenue)%"></i></div>
+                <div class="num">@Format.Currency(r.GrossRevenue)</div>
+            </div>
+            <div class="bridge-row">
+                <div class="name"><span class="op">−</span>Total Discounts</div>
+                <div class="bar"><i class="minus" style="width:@W(r.TotalDiscounts)%"></i></div>
+                <div class="num">− @Format.Currency(r.TotalDiscounts)</div>
+            </div>
+            <div class="bridge-row">
+                <div class="name"><span class="op">−</span>Total Returns</div>
+                <div class="bar"><i class="minus" style="width:@W(r.TotalReturns)%"></i></div>
+                <div class="num">− @Format.Currency(r.TotalReturns)</div>
+            </div>
+            <div class="bridge-row result">
+                <div class="name"><span class="op">=</span>Net Revenue <span class="badge">Finance</span></div>
+                <div class="bar"><i class="total" style="width:@W(r.NetRevenue)%"></i></div>
+                <div class="num">@Format.Currency(r.NetRevenue)</div>
+            </div>
+            <div class="bridge-row">
+                <div class="name"><span class="op">+</span>Pipeline adjustments</div>
+                <div class="bar"><i class="@(r.PipelineAdjustments < 0 ? "minus" : "plus")" style="width:@W(r.PipelineAdjustments)%"></i></div>
+                <div class="num">@Format.Signed(r.PipelineAdjustments)</div>
+            </div>
+            <div class="bridge-row excel">
+                <div class="name"><span class="op">+</span><span>Excel adjustments<span class="note">Originally missing from the pipeline</span></span></div>
+                <div class="bar"><i class="excel" style="width:@W(r.ExcelAdjustments)%"></i></div>
+                <div class="num" style="color:var(--pink)">@Format.Signed(r.ExcelAdjustments)</div>
+            </div>
+            <div class="bridge-row result">
+                <div class="name"><span class="op">=</span>Adjusted Net Revenue <span class="badge cyan">Management</span></div>
+                <div class="bar"><i class="total" style="width:@W(r.AdjustedNetRevenue)%;background:linear-gradient(90deg,var(--cyan),var(--indigo))"></i></div>
+                <div class="num" style="color:var(--cyan)">@Format.Currency(r.AdjustedNetRevenue)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="callout pink" style="margin-top:1rem;font-size:1.05rem">
+        <div class="grid-3" style="flex:1">
+            <div class="stat"><b>@Format.Currency(r.AdjustedNetRevenueWithoutExcel)</b><span>Without Excel corrections</span></div>
+            <div class="stat"><b style="color:var(--cyan)">@Format.Currency(r.AdjustedNetRevenue)</b><span>With Excel corrections</span></div>
+            <div class="stat"><b style="color:var(--pink)">@Format.Signed(r.AdjustedNetRevenue - r.AdjustedNetRevenueWithoutExcel)</b><span>Difference</span></div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem">
+        <div class="card-head">
+            <h2>Excel adjustment details</h2>
+            <span class="badge">@r.ExcelAdjustmentDetails.Count rows · @r.ExcelAdjustmentDetails.Count(a => a.Status == "Approved") approved</span>
+        </div>
+        @if (r.ExcelAdjustmentDetails.Count == 0)
+        {
+            <p class="muted">No Excel adjustments in this period for your access scope.</p>
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table class="table">
+                    <thead><tr><th>Date</th><th>Region</th><th>Business unit</th><th class="num">Amount</th><th>Reason</th><th>Comment</th><th>Approved by</th><th>Status</th></tr></thead>
+                    <tbody>
+                        @foreach (var a in r.ExcelAdjustmentDetails)
+                        {
+                            var pending = a.Status != "Approved";
+                            <tr class="@(pending ? "muted-row" : "")">
+                                <td class="mono small nowrap">@Format.Date(a.Date)</td>
+                                <td>@a.Region</td>
+                                <td>@a.BusinessUnit</td>
+                                <td class="num">@Format.Signed(a.Amount)</td>
+                                <td>@a.Reason</td>
+                                <td class="small">@a.Comment</td>
+                                <td class="small">@(string.IsNullOrEmpty(a.ApprovedBy) ? "–" : a.ApprovedBy)</td>
+                                <td>
+                                    @if (pending)
+                                    {
+                                        <span class="badge amber">@a.Status</span> <span class="small dim">not approved → excluded</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge cyan">@a.Status</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    <div class="card soft" style="margin-top:1rem">
+        <h3>How the corrections enter the governed pipeline</h3>
+        <div class="steps">
+            <div class="step"><span class="n">1</span><b>Excel workbook</b><span>Finance keeps manual corrections (true-ups, pricing errors, bad debt) with reason, approver and status.</span></div>
+            <div class="step"><span class="n">2</span><b>Ingestion (seed tool / Dataflow Gen2)</b><span>Loads the workbook into the Warehouse table <code class="inline">cwd.FactFinanceAdjustment</code>.</span></div>
+            <div class="step"><span class="n">3</span><b>Measure <code class="inline">[Finance Adjustments]</code></b><span>Sums only rows with Status = Approved; Adjusted Net Revenue = Net Revenue + Finance Adjustments.</span></div>
+        </div>
+        <p class="small dim" style="margin:1rem 0 0">Data origin: @r.DataOrigin</p>
+    </div>
+}
+
+@code {
+    private int year = 2026;
+    private int quarter = 3;
+    private string region = "";
+    private bool loading;
+    private string? error;
+    private ReconciliationReport? report;
+    private readonly CancellationTokenSource cts = new();
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private Task OnYear(ChangeEventArgs e) { year = int.Parse(e.Value?.ToString() ?? "2026"); return LoadAsync(); }
+    private Task OnQuarter(ChangeEventArgs e) { quarter = int.Parse(e.Value?.ToString() ?? "0"); return LoadAsync(); }
+    private Task OnRegion(ChangeEventArgs e) { region = e.Value?.ToString() ?? ""; return LoadAsync(); }
+
+    private async Task LoadAsync()
+    {
+        loading = true; error = null;
+        StateHasChanged();
+        try
+        {
+            var spec = quarter == 0 ? PeriodSpec.OfYear(year) : PeriodSpec.OfQuarter(year, quarter);
+            report = await Service.BuildAsync(spec, string.IsNullOrEmpty(region) ? null : region, cts.Token);
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception)
+        {
+            error = "The reconciliation could not be calculated right now. Please check System Health.";
+        }
+        finally
+        {
+            loading = false;
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose() { cts.Cancel(); cts.Dispose(); }
+}

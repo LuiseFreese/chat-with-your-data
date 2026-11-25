@@ -1,0 +1,112 @@
+@inject PresentationState Presentation
+@implements IDisposable
+
+<div class="inspector">
+    <button class="inspector-toggle" type="button" @onclick="() => open = !open" aria-expanded="@open.ToString().ToLowerInvariant()">
+        <span>@(open ? "▾" : "▸")</span> Technical inspector
+        <span class="badge small">@Record.Outcome</span>
+        <span class="badge small">@Format.Ms(Record.TotalDuration)</span>
+    </button>
+
+    @if (open)
+    {
+        <div class="right" style="margin-top:-1.6rem">
+            <button class="btn btn-sm btn-ghost" type="button" @onclick="Enlarge">⤢ Enlarge</button>
+        </div>
+        @Body
+    }
+</div>
+
+@if (Presentation.InspectorEnlarged && owner)
+{
+    <div class="inspector-overlay fade-in" role="dialog" aria-modal="true" aria-label="Technical inspector (enlarged)">
+        <div class="inspector-overlay-head">
+            <h2 class="grad-text">Technical inspector</h2>
+            <button class="btn" type="button" @onclick="Close">✕ Close</button>
+        </div>
+        @Body
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public QueryExecutionRecord Record { get; set; } = default!;
+    [Parameter] public bool InitiallyOpen { get; set; }
+
+    private bool open;
+    private bool owner;
+
+    protected override void OnInitialized()
+    {
+        open = InitiallyOpen;
+        Presentation.Changed += OnPresentationChanged;
+    }
+
+    private void Enlarge()
+    {
+        owner = true;
+        if (!Presentation.InspectorEnlarged) Presentation.Toggle();
+    }
+
+    private void Close()
+    {
+        owner = false;
+        if (Presentation.InspectorEnlarged) Presentation.Toggle();
+    }
+
+    private void OnPresentationChanged()
+    {
+        if (!Presentation.InspectorEnlarged) owner = false;
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose() => Presentation.Changed -= OnPresentationChanged;
+
+    private RenderFragment Body => __builder =>
+    {
+        <div class="inspector-body">
+            <section>
+                <h4>Request</h4>
+                <dl class="kv">
+                    <dt>Question</dt><dd>@Record.Question</dd>
+                    <dt>User</dt><dd>@Record.User</dd>
+                    <dt>Timestamp</dt><dd>@Format.DateTime(Record.Timestamp)</dd>
+                    <dt>Correlation id</dt><dd class="mono small">@Record.CorrelationId</dd>
+                    <dt>Outcome</dt><dd>@Record.Outcome @if (Record.Error is not null) { <span class="badge red">@Record.Error</span> }</dd>
+                </dl>
+            </section>
+            <section>
+                <h4>Pipeline</h4>
+                <dl class="kv">
+                    <dt>Parser</dt><dd>@Record.ParserName</dd>
+                    <dt>Data provider</dt><dd>@Record.ProviderName <span class="badge @(Record.Mode == "Connected" ? "cyan" : "amber")">@Record.Mode</span></dd>
+                    <dt>Semantic model</dt><dd>@(Record.SemanticModel ?? "–")</dd>
+                    <dt>Selected metric</dt><dd>@(Record.SelectedMetric ?? "–")</dd>
+                </dl>
+                <div class="durations" style="margin-top:.7rem">
+                    <div><b>@Format.Ms(Record.ParseDuration)</b><span>Parse</span></div>
+                    <div><b>@Format.Ms(Record.ExecutionDuration)</b><span>Execution</span></div>
+                    <div><b>@Format.Ms(Record.TotalDuration)</b><span>Total</span></div>
+                </div>
+            </section>
+            <section>
+                <h4>Parsed intent (structured output – the only thing the model produces)</h4>
+                <pre class="code">@Format.Json(Record.Intent)</pre>
+            </section>
+            <section>
+                <h4>Validation against the metric catalog</h4>
+                <ValidationIssues Issues="Record.ValidationIssues" />
+            </section>
+            <section style="grid-column: 1 / -1">
+                <h4>Generated DAX (deterministic builder – never written by the model)</h4>
+                @if (Record.Dax is null)
+                {
+                    <p class="dim small">No query was generated – the request did not pass validation.</p>
+                }
+                else
+                {
+                    <pre class="code">@Record.Dax</pre>
+                }
+            </section>
+        </div>
+    };
+}

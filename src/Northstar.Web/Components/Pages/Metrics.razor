@@ -1,0 +1,120 @@
+@page "/metrics"
+@inject MetricCatalog Catalog
+
+<PageTitle>Metric Catalog · Northstar</PageTitle>
+
+<div class="page-head">
+    <div>
+        <h1 class="grad-text">Metric Catalog</h1>
+        <p class="lead">The server-owned list of what may be asked. The language model may only pick from these ids; the DAX builder may only reference the listed semantic measures. Semantic model: <code class="inline">@MetricCatalog.SemanticModelName</code>.</p>
+    </div>
+    <input class="input" style="min-width:320px" placeholder="Filter metrics, synonyms, owners…" @bind="filter" @bind:event="oninput" />
+</div>
+
+<div class="grid-auto">
+    @foreach (var m in Filtered)
+    {
+        <div class="card metric-card @(m.ApprovedForConversationalQuerying ? "" : "soft")">
+            <div class="card-head">
+                <h3>@m.BusinessName</h3>
+                @if (m.ApprovedForConversationalQuerying)
+                {
+                    <span class="badge cyan dot">approved for chat</span>
+                }
+                else
+                {
+                    <span class="badge red dot">not approved</span>
+                }
+            </div>
+            <p class="muted">@m.Description</p>
+            <dl class="kv small">
+                <dt>Formula</dt><dd><code class="inline">@m.Formula</code></dd>
+                <dt>Measure</dt><dd><code class="inline">[@m.SemanticMeasure]</code></dd>
+                <dt>Owner</dt><dd>@m.BusinessOwner</dd>
+                <dt>Format</dt><dd class="mono">@m.FormatString</dd>
+                @if (m.AmbiguityGroup is not null)
+                {
+                    <dt>Ambiguity group</dt><dd><span class="badge violet">@m.AmbiguityGroup</span></dd>
+                }
+                @if (m.RelatedMetrics.Count > 0)
+                {
+                    <dt>Related</dt><dd>@string.Join(", ", m.RelatedMetrics.Select(id => Catalog.FindMetric(id)?.BusinessName ?? id))</dd>
+                }
+            </dl>
+            @if (m.ConfusionNote is not null)
+            {
+                <div class="callout pink trap"><strong>Terminology trap</strong><span>@m.ConfusionNote</span></div>
+            }
+            @if (m.Synonyms.Count > 0)
+            {
+                <div class="syn">
+                    @foreach (var s in m.Synonyms) { <span>@s</span> }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@if (!Filtered.Any())
+{
+    <p class="muted">No metric matches “@filter”.</p>
+}
+
+<hr class="sep" />
+
+<h2>Ambiguous business terms</h2>
+<p class="muted">When a question uses one of these words, the pipeline stops and asks for clarification instead of guessing.</p>
+<div class="grid-auto">
+    @foreach (var t in Catalog.AmbiguousTerms)
+    {
+        <div class="card accent-violet">
+            <div class="card-head"><h3>“@t.Term”</h3><span class="badge violet">@t.CandidateMetricIds.Count candidates</span></div>
+            <p>@t.Question</p>
+            <ul style="margin:0;padding-left:1.1rem">
+                @foreach (var id in t.CandidateMetricIds)
+                {
+                    <li>@(Catalog.FindMetric(id)?.BusinessName ?? id)</li>
+                }
+            </ul>
+            <div class="syn metric-card" style="margin-top:.6rem">
+                @foreach (var s in t.Synonyms) { <span>@s</span> }
+            </div>
+        </div>
+    }
+</div>
+
+<hr class="sep" />
+
+<h2>Approved dimensions</h2>
+<p class="muted">Grouping and filtering is limited to these dimensions and – where listed – to their known members.</p>
+<div class="table-wrap card">
+    <table class="table">
+        <thead><tr><th>Dimension</th><th>Semantic column</th><th>Description</th><th>Known values</th><th>Synonyms</th></tr></thead>
+        <tbody>
+            @foreach (var d in Catalog.Dimensions)
+            {
+                <tr>
+                    <td><strong>@d.BusinessName</strong> @if (d.LineGrain) { <span class="badge amber" title="Only available on order lines">line grain</span> }</td>
+                    <td><code class="inline">'@d.SemanticTable'[@d.SemanticColumn]</code></td>
+                    <td class="muted">@d.Description</td>
+                    <td>@(d.KnownValues.Count == 0 ? "– (period driven)" : string.Join(", ", d.KnownValues))</td>
+                    <td class="muted small">@string.Join(", ", d.Synonyms)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private string filter = "";
+
+    private IEnumerable<MetricDefinition> Filtered => Catalog.Metrics
+        .Where(m => string.IsNullOrWhiteSpace(filter)
+            || m.BusinessName.Contains(filter, StringComparison.OrdinalIgnoreCase)
+            || m.Description.Contains(filter, StringComparison.OrdinalIgnoreCase)
+            || m.BusinessOwner.Contains(filter, StringComparison.OrdinalIgnoreCase)
+            || m.SemanticMeasure.Contains(filter, StringComparison.OrdinalIgnoreCase)
+            || m.Synonyms.Any(s => s.Contains(filter, StringComparison.OrdinalIgnoreCase)))
+        .OrderByDescending(m => m.ApprovedForConversationalQuerying)
+        .ThenBy(m => m.BusinessName);
+}

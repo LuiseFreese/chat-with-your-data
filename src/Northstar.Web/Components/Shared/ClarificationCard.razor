@@ -1,0 +1,29 @@
+<div class="card accent-violet fade-in">
+    <div class="card-head">
+        <h3><span class="badge violet">Clarification</span> @Clarification.Question</h3>
+        <span class="badge">term: “@Clarification.Term”</span>
+    </div>
+    <p class="muted small">The question matches several approved definitions. The governed pipeline never guesses – pick the one you mean and the query resumes with that definition.</p>
+    <div class="option-grid">
+        @foreach (var option in Clarification.Options)
+        {
+            <button class="option" type="button" disabled="@(Resolved || Disabled)" @onclick="() => OnSelect.InvokeAsync(option)">
+                <div class="name">@option.BusinessName</div>
+                <div class="desc">@option.Description</div>
+                <div class="formula">@option.Formula</div>
+                <div class="small dim" style="margin-top:.3rem">Owner: @option.BusinessOwner</div>
+            </button>
+        }
+    </div>
+    @if (Resolved)
+    {
+        <p class="small muted" style="margin:.7rem 0 0">Resolved – the answer is shown above.</p>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public ClarificationRequest Clarification { get; set; } = default!;
+    [Parameter] public EventCallback<MetricDefinition> OnSelect { get; set; }
+    [Parameter] public bool Resolved { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+}

@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Northstar.Application/Northstar.Application.csproj" />
+    <Project Path="src/Northstar.Domain/Northstar.Domain.csproj" />
+    <Project Path="src/Northstar.Infrastructure/Northstar.Infrastructure.csproj" />
+    <Project Path="src/Northstar.Web/Northstar.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Northstar.Tests/Northstar.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Northstar.Fabric.Tool/Northstar.Fabric.Tool.csproj" />
+  </Folder>
+</Solution>

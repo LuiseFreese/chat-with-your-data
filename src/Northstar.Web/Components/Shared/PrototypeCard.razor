@@ -1,0 +1,70 @@
+<div class="card accent-amber fade-in">
+    <div class="card-head">
+        <h3><span class="badge amber">Prototype</span> LLM → SQL → database</h3>
+        <span class="badge">@Format.Ms(Response.Duration)</span>
+    </div>
+
+    @if (Response.Blocked)
+    {
+        <div class="callout red">
+            <strong>Execution blocked by demo guard.</strong>
+            <span>A real prototype would have executed the generated statement and returned the rows.</span>
+        </div>
+    }
+    else if (Response.GroupedByRegion && Response.Rows.Count > 0)
+    {
+        <div class="numbers">
+            <div>
+                <div class="big-label">Revenue (all regions, as returned)</div>
+                <div class="big-number amber">@Format.Currency(Response.Rows.Sum(r => r.Value ?? 0))</div>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th>Region</th><th class="num">Revenue</th></tr></thead>
+                <tbody>
+                    @foreach (var row in Response.Rows)
+                    {
+                        <tr><td>@row.Keys.FirstOrDefault()</td><td class="num">@Format.Currency(row.Value)</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <BarChart Rows="ChartRows" />
+    }
+    else if (Response.Rows.Count > 0)
+    {
+        <div class="numbers">
+            <div>
+                <div class="big-label">Revenue</div>
+                <div class="big-number amber">@Format.Currency(Response.Rows.Sum(r => r.Value ?? 0))</div>
+            </div>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Response.Answer))
+    {
+        <p style="font-size:1.05rem">@Response.Answer</p>
+    }
+
+    <p class="code-label">Generated query (not executed)</p>
+    <pre class="code wrap">@Response.PseudoQuery</pre>
+    <p class="small dim" style="margin-top:.5rem">Implicit definition: @Response.ImplicitDefinition</p>
+    <p class="small dim">Data source: @Response.DataSource</p>
+
+    <details class="disclosure" style="margin-top:.6rem">
+        <summary>What went wrong (@Response.WhatWentWrong.Count)</summary>
+        <ul class="warnings" style="color:var(--text)">
+            @foreach (var item in Response.WhatWentWrong)
+            {
+                <li>@item</li>
+            }
+        </ul>
+    </details>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public PrototypeResponse Response { get; set; } = default!;
+
+    private IReadOnlyList<ChartRow> ChartRows => Response.Rows.Select(r => new ChartRow(r.Keys.FirstOrDefault() ?? string.Empty, r.Value)).ToList();
+}
